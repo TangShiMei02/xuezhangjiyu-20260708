@@ -1,58 +1,26 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小朱，信了吧！</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #1a1a2e;
-            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-        }
-        .container {
-            text-align: center;
-            padding: 40px;
-        }
-        .text {
-            color: #e94560;
-            font-size: 2.5rem;
-            font-weight: bold;
-            line-height: 1.6;
-            text-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
-            animation: pulse 2s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.9; }
-        }
-        .emoji {
-            font-size: 4rem;
-            margin-top: 20px;
-            display: block;
-            animation: bounce 1s ease infinite;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="text">
-            小朱你竟然不信！<br>
-            现在你一定相信了！
-        </div>
-        <span class="emoji">😎</span>
-    </div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#1a1a2e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>时空胶囊 - 傥学长的寄语</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zhi+Mang+Xing&family=Noto+Sans+SC:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <script>
+      // 移动端禁止弹性滚动
+      document.addEventListener('touchmove', function(e) {
+        if (e.target.closest('.scrollable')) return;
+        e.preventDefault();
+      }, { passive: false });
+    </script>
+  </head>
+  <body class="bg-space-blue overflow-hidden">
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>
