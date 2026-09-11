@@ -1,0 +1,2859 @@
+<!doctype html>
+<html lang="zh-CN" data-page-node-id="DEaV3mLXIXnJVQJyI2mFjK">
+<head data-page-node-id="0A0PHxMBRjAZ1JyHexz0QX">
+<meta charset="utf-8" data-page-node-id="RYo9Iqjn5IfeQSF99QayAZ">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" data-page-node-id="HqY7WsadziA1XVG9yPQY7C">
+<meta name="theme-color" content="#F7F4EE" data-page-node-id="BaeS6bQoDVPaHbJ6zdN7A1">
+<title>时空胶囊 · 学长寄语</title>
+<meta name="description" content="贴在书桌下的 NFC 标签，通往一段留给下一位住客的话。" data-page-node-id="Vj69kI2RItEmMGug8BmrhO">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23141210'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23D9A441' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%23D9A441'/%3E%3C/svg%3E" data-page-node-id="UgLGAvc3qmHXjLyFHtlNCD">
+
+
+<script>
+/* 主题必须在首帧之前定好，否则会先闪一下另一种颜色再跳回来。
+   优先级：用户上次手动选的 > 浅色（默认值）。
+   这里刻意不读系统的 prefers-color-scheme —— 默认就是浅色，
+   想看深色自己点右上角那个按钮，选过之后会一直记住。 */
+(function () {
+  var t = null;
+  try { t = localStorage.getItem('capsule.theme'); } catch (e) { /* 隐私模式下读不到，忽略 */ }
+  if (t !== 'light' && t !== 'dark') t = 'light';
+  document.documentElement.setAttribute('data-theme', t);
+  var m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute('content', t === 'light' ? '#F7F4EE' : '#141210');
+})();
+</script>
+
+<!--
+==========================================================================
+  时空胶囊 · 单文件版
+  给学弟：整页就这一个文件，双击就能看，扔到任何虚拟主机 / 静态托管都能跑。
+  要改内容：翻到文件最下面的 script 区，最上面那一段【CONFIG】就是全部可改项。
+==========================================================================
+
+  【动效选型说明】（依据「8 种有质感的交互动效」场景表做取舍）
+
+  入选：
+  · Layered Parallax 3D 视差 —— 用在封面，前景/中景/背景分三层随指针偏移。
+  · Center-focus Scaling 中心聚焦 —— 用在记忆碎片横滑，靠近滑动区中心的卡片放大。
+  · Liquid Tab Indicator 液态 Tab —— 用在顶部导航和生存指南分类，两处复用同一个实现。
+  · Shared-element Image Expansion 图片展开 —— 照片卡点开时从缩略图连续放大到全屏。
+  · Gesture-driven Transition 手势转场 —— 全屏图支持下滑关闭，松手按距离与速度决定去留。
+
+  未入选及理由：
+  · Magnetic Attraction 磁吸 —— 规范原话「没有明确需求时，不让关键按钮本体追着鼠标跑，
+    避免命中区域难以预测」。本页按钮少而关键，不做。
+  · Velocity-driven Deformation 液态形变 —— 需要可拖拽卡片，本页没有拖拽场景。
+  · Collision and Spring Response 碰撞回弹 —— 规范原话「普通表单、导航和正文不默认加入
+    物理碰撞」。本页的导航和正文都不加。弹性的收尾只保留在全屏图松手那一下（那是物理行为）。
+
+  关键可调参数（都在 CONFIG.motion 里）：
+  · parallax.depth   视差最大位移（px）；parallax.follow 跟手速度
+  · carousel.minScale / minOpacity   中心聚焦的最弱端
+  · tab.duration     液态指示器的基准时长（ms），尾边自动按 1.35 倍拖长
+  · viewer.closeRatio / closeVelocity   全屏图松手判定阈值
+  · typewriter.speed 寄语打字速度（ms/字）
+
+  完成与取消规则：
+  · 全屏图：下拉超过视口 28% 或松手速度超过 0.6 px/ms → 关闭；否则回到原位。
+  · 液态 Tab：连续快速点击时从指示器「当前可见位置」接续，不排长队，只认最后一次选择。
+  · 所有动效在 prefers-reduced-motion: reduce 下一律降级为直接切换，功能不减。
+
+  【主题：深色 + 浅色】
+  · 两套颜色都在样式区最上面的变量区，变量名一一对应，改一处记得回来看另一处。
+    深色写在 :root 里，浅色写在 html[data-theme="light"] 里。
+  · 默认是浅色。右上角的按钮能手动切到深色，选过之后就记住了。
+    页面不读系统的深浅色偏好 —— 想换就自己点，不会被系统带着走。
+  · 想把默认值改成深色：打开 <head> 里那段防闪脚本，
+    把 `t = 'light';` 这句换成 `t = 'dark';`（顺带把 <meta name="theme-color">
+    的初始值也改成 #141210，否则手机地址栏会在首帧闪一下浅色）。
+  · 证书图片会按当前主题重新配色，切完主题再点保存拿到的就是对应那套。
+-->
+
+<style>
+/* ==========================================================================
+   1. Tokens
+   ========================================================================== */
+/* 深色是默认。浅色在下面用 html[data-theme="light"] 覆盖 —— 那个选择器
+   特异性比 :root 高一档，所以顺序和层叠都不用担心。
+   两套值是一一对应的：改一处颜色，另一套要跟着看一眼。 */
+:root{
+  --bg:        #141210;
+  --bg-lift:   #191714;
+  --surface:   #201D19;
+  --surface-2: #262219;
+  --line:      #322D26;
+  --line-2:    #453D31;
+
+  --fg:    #F2EDE4;
+  --fg-2:  #B0A796;
+  --fg-3:  #7A7264;
+
+  --amber:     #D9A441;
+  --amber-hi:  #F0C667;   /* 深底上 hover 要更亮 */
+  --amber-dim: #6B5222;
+  --on-amber:  #17140F;   /* 落在琥珀底上的文字 */
+
+  /* 半透明层：导航、遮罩、全屏图、浮在照片上的标签 */
+  --nav-bg:      rgba(20,18,16,.78);
+  --viewer-bg:   rgba(10,9,8,.94);
+  --viewer-fade: rgba(10,9,8,.86);
+  --scrim:       rgba(10,9,8,.7);
+  --chip-bg:     rgba(32,29,25,.9);
+  /* 照片上的标签不跟主题走 —— 照片内容不可控，深底浅字最稳 */
+  --on-photo-bg: rgba(20,18,16,.82);
+  --on-photo-fg: #E8E2D6;
+  --on-photo-line: rgba(255,255,255,.16);
+
+  /* 琥珀淡染：hover 蒙层、封面辉光、代码底色 */
+  --tint-0: rgba(217,164,65,0);
+  --tint-1: rgba(217,164,65,.07);
+  --tint-2: rgba(217,164,65,.09);
+  --tint-3: rgba(217,164,65,.13);
+
+  --hairline: rgba(255,255,255,.035);   /* 封面网格线 */
+
+  --shadow-1: 0 26px 60px -34px rgba(0,0,0,.9);
+  --shadow-2: 0 30px 80px -30px rgba(0,0,0,.95);
+  --shadow-3: 0 20px 44px -22px rgba(0,0,0,.9);
+
+  /* 占位图（照片区留空时画的那三张线稿）*/
+  --ph-bg:   #272119;
+  --ph-soft: #332B21;
+  --ph-line: #544939;
+
+  --r-lg: 8px;
+  --r-md: 4px;
+  --r-sm: 2px;
+
+  --nav-h: 58px;
+  --pad:   clamp(20px, 5vw, 40px);
+  --maxw:  1080px;
+
+  --ease-out: cubic-bezier(.22,.61,.36,1);
+  --sans: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", "Noto Sans SC", sans-serif;
+}
+
+/* 浅色：暖白纸感，像一本摊开的留言册。
+   注意琥珀金在白底上只有 2.3:1，当正文色是读不了的，所以这一套把它压深到
+   6.6:1；hover 方向也跟着反过来 —— 白底上要变深，不是变亮。 */
+html[data-theme="light"]{
+  --bg:        #F4F1EA;
+  --bg-lift:   #FBF9F4;
+  --surface:   #FFFFFF;
+  --surface-2: #EBE6DB;
+  --line:      #E1DACD;
+  --line-2:    #CCC3B1;
+
+  --fg:    #221F1A;
+  --fg-2:  #5C5548;
+  --fg-3:  #7D7466;
+
+  --amber:     #7A560F;
+  --amber-hi:  #5E4108;
+  --amber-dim: #957A33;
+  --on-amber:  #FFFFFF;
+
+  --nav-bg:      rgba(244,241,234,.82);
+  --viewer-bg:   rgba(250,248,244,.96);
+  --viewer-fade: rgba(250,248,244,.9);
+  --scrim:       rgba(43,38,30,.42);
+  --chip-bg:     rgba(255,255,255,.92);
+
+  --tint-0: rgba(122,86,15,0);
+  --tint-1: rgba(122,86,15,.055);
+  --tint-2: rgba(122,86,15,.075);
+  --tint-3: rgba(122,86,15,.1);
+
+  --hairline: rgba(34,31,26,.055);
+
+  /* 浅色下的影子靠暖褐，不靠黑 —— 纯黑阴影在米白底上会发脏 */
+  --shadow-1: 0 18px 42px -28px rgba(64,52,32,.3);
+  --shadow-2: 0 26px 64px -26px rgba(64,52,32,.32);
+  --shadow-3: 0 14px 34px -18px rgba(64,52,32,.28);
+
+  /* 占位图在浅色下要往深里走一档，否则线稿和白卡片糊在一起 */
+  --ph-bg:   #F0EBE0;
+  --ph-soft: #E2DAC6;
+  --ph-line: #A89C82;
+}
+
+/* ==========================================================================
+   2. Base
+   ========================================================================== */
+*,*::before,*::after{ box-sizing:border-box; }
+
+html{
+  scroll-behavior:smooth;
+  scrollbar-gutter:stable;
+  -webkit-text-size-adjust:100%;
+}
+
+/* hidden 属性必须赢过组件自己的 display，否则按钮藏不掉 */
+[hidden]{ display:none !important; }
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.75;
+  letter-spacing:.01em;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* 极轻的噪点，让大片纯色不发假 */
+body::after{
+  content:"";
+  position:fixed; inset:0; z-index:900;
+  pointer-events:none; opacity:.032;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+h1,h2,h3{ margin:0; font-weight:600; line-height:1.3; letter-spacing:-.01em; }
+p{ margin:0; }
+ul{ margin:0; padding:0; list-style:none; }
+button{ font:inherit; color:inherit; }
+a{ color:var(--amber); text-decoration:none; }
+a:hover{ color:var(--amber-hi); }
+
+:focus-visible{
+  outline:2px solid var(--amber);
+  outline-offset:3px;
+  border-radius:var(--r-sm);
+}
+
+/* 屏幕阅读器专用 */
+.sr{
+  position:absolute; width:1px; height:1px;
+  padding:0; margin:-1px; overflow:hidden;
+  clip:rect(0 0 0 0); white-space:nowrap; border:0;
+}
+
+/* 跳到正文 */
+.skip{
+  position:fixed; top:8px; left:8px; z-index:1000;
+  padding:10px 16px; border-radius:var(--r-md);
+  background:var(--amber); color:var(--on-amber); font-weight:600;
+  transform:translateY(-160%);
+  transition:transform .2s var(--ease-out);
+}
+.skip:focus{ transform:none; }
+
+/* ==========================================================================
+   3. 顶部导航 + 液态 Tab 指示器
+   ========================================================================== */
+.nav{
+  position:fixed; inset:0 0 auto 0; z-index:100;
+  height:var(--nav-h);
+  display:flex; align-items:center; gap:16px;
+  padding:0 var(--pad);
+  background:var(--nav-bg);
+  -webkit-backdrop-filter:blur(14px) saturate(1.2);
+  backdrop-filter:blur(14px) saturate(1.2);
+  border-bottom:1px solid var(--line);
+}
+
+.nav__brand{
+  display:flex; align-items:center; gap:9px;
+  font-size:13px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--fg-2); white-space:nowrap;
+  background:none; border:0; padding:0; cursor:pointer;
+}
+.nav__brand svg{ display:block; color:var(--amber); }
+.nav__brand b{ color:var(--fg); font-weight:600; letter-spacing:.14em; }
+
+/* 主题开关。图标显示的是"点下去会变成什么"：深色下给太阳，浅色下给月亮。 */
+.themebtn{
+  flex:0 0 auto;
+  width:34px; height:34px;
+  display:grid; place-items:center;
+  background:none; border:1px solid transparent; border-radius:var(--r-md);
+  color:var(--fg-3); cursor:pointer;
+  transition:color .2s var(--ease-out), border-color .2s var(--ease-out);
+}
+.themebtn:hover{ color:var(--fg); border-color:var(--line-2); }
+.themebtn svg{ display:block; }
+.themebtn__moon{ display:none; }
+html[data-theme="light"] .themebtn__sun{ display:none; }
+html[data-theme="light"] .themebtn__moon{ display:block; }
+
+/* 换主题时允许颜色过渡，但只在切换那一瞬间 —— 挂 260ms 的临时类，
+   不会干扰滚动、悬停这些本来就有的动效。 */
+html.is-theming *,
+html.is-theming *::before,
+html.is-theming *::after{
+  transition:background-color .2s linear, color .2s linear,
+             border-color .2s linear, fill .2s linear, stroke .2s linear !important;
+}
+
+/* Tab 轨道：指示器是绝对定位的独立元素，不是每个标签自己的背景 */
+.tabs{
+  position:relative;
+  margin-left:auto;
+  display:flex; align-items:center; gap:2px;
+  overflow-x:auto; overflow-y:hidden;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+  max-width:100%;
+}
+.tabs::-webkit-scrollbar{ display:none; }
+
+.tabs__ind{
+  position:absolute; left:0; top:50%;
+  height:32px; width:0;
+  margin-top:-16px;
+  border-radius:var(--r-md);
+  background:var(--surface-2);
+  border:1px solid var(--line-2);
+  pointer-events:none;
+}
+
+.tabs__tab{
+  position:relative; z-index:1;
+  flex:0 0 auto;
+  min-height:44px;
+  padding:0 12px;
+  display:inline-flex; align-items:center;
+  background:none; border:0; cursor:pointer;
+  font-size:14px; color:var(--fg-3);
+  white-space:nowrap;
+  transition:color .22s var(--ease-out);
+}
+.tabs__tab[aria-selected="true"]{ color:var(--fg); font-weight:600; }
+.tabs__tab:hover{ color:var(--fg-2); }
+.tabs__tab[aria-selected="true"]:hover{ color:var(--fg); }
+
+/* 顶部滚动进度 */
+.progress{
+  position:fixed; top:var(--nav-h); left:0; right:0; z-index:99;
+  height:1px; background:transparent;
+}
+.progress i{
+  display:block; height:100%; width:0;
+  background:var(--amber);
+  transform-origin:0 50%;
+}
+
+/* ==========================================================================
+   4. 通用板块骨架
+   ========================================================================== */
+.sec{
+  max-width:var(--maxw);
+  margin:0 auto;
+  padding:clamp(72px,11vw,132px) var(--pad);
+  scroll-margin-top:calc(var(--nav-h) + 8px);
+}
+.sec + .sec{ border-top:1px solid var(--line); }
+
+.sec__head{ margin-bottom:36px; }
+.sec__idx{
+  display:block;
+  font-size:12px; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--amber-dim); margin-bottom:10px;
+}
+.sec__title{ font-size:clamp(24px,4.2vw,32px); }
+.sec__desc{ margin-top:12px; max-width:56ch; color:var(--fg-2); font-size:15px; }
+
+/* 滚动入场：默认可见，只有 JS 开了才隐藏，避免无 JS 时白屏 */
+.js .reveal{ opacity:0; transform:translateY(20px); }
+.js .reveal.is-in{
+  opacity:1; transform:none;
+  transition:opacity .55s var(--ease-out), transform .55s var(--ease-out);
+}
+
+/* ==========================================================================
+   5. 封面（3D 视差）
+   ========================================================================== */
+.cover{
+  position:relative;
+  min-height:clamp(560px,92svh,900px);
+  display:flex; align-items:center;
+  max-width:var(--maxw); margin:0 auto;
+  padding:calc(var(--nav-h) + 48px) var(--pad) 72px;
+}
+
+.parallax{
+  position:relative;
+  width:100%;
+  perspective:900px;
+}
+
+/* 三层：数字越大动得越多。
+   --px / --py 由 JS 的指针视差写入；合成放在 CSS 里做，各层自己的定位才不会被冲掉。 */
+.parallax__layer{ will-change:transform; }
+.parallax__layer[data-depth]{
+  transition:none;
+  transform:translate3d(var(--px,0px),var(--py,0px),0);
+}
+/* 上面那条的 specificity 和本行相同，靠"写在后面"胜出，保住自己的水平居中 */
+.parallax__layer.pl-glow{
+  transform:translateX(-50%) translate3d(var(--px,0px),var(--py,0px),0);
+}
+
+.pl-glow{
+  position:absolute; z-index:0;
+  top:-18%; left:50%; width:min(620px,92vw); height:420px;
+  transform:translateX(-50%);
+  background:radial-gradient(ellipse at 50% 40%, var(--tint-3), var(--tint-0) 68%);
+  pointer-events:none;
+}
+
+.pl-grid{
+  position:absolute; z-index:0; inset:8% -6% -14% -6%;
+  background-image:
+    linear-gradient(var(--hairline) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hairline) 1px, transparent 1px);
+  background-size:64px 64px;
+  -webkit-mask-image:radial-gradient(ellipse at 50% 46%, #000 12%, transparent 72%);
+  mask-image:radial-gradient(ellipse at 50% 46%, #000 12%, transparent 72%);
+  pointer-events:none;
+}
+
+.pl-card{
+  position:relative; z-index:2;
+  background:var(--surface);
+  border:1px solid var(--line-2);
+  border-radius:var(--r-lg);
+  padding:clamp(26px,5vw,46px);
+  box-shadow:var(--shadow-1);
+}
+
+.pl-nfc{
+  display:inline-flex; align-items:center; gap:9px;
+  padding:6px 12px 6px 9px;
+  border:1px solid var(--line-2); border-radius:var(--r-md);
+  background:var(--bg-lift);
+  font-size:12px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--fg-2);
+}
+.pl-nfc svg{ color:var(--amber); }
+
+.pl-title{
+  margin:22px 0 0;
+  font-size:clamp(30px,7vw,52px);
+  line-height:1.16;
+  letter-spacing:-.02em;
+}
+.pl-title em{
+  font-style:normal;
+  color:var(--amber);
+}
+
+.pl-sub{
+  margin-top:18px; max-width:46ch;
+  color:var(--fg-2); font-size:clamp(14px,2.4vw,16px);
+}
+
+.pl-meta{
+  margin-top:28px; padding-top:22px;
+  border-top:1px solid var(--line);
+  display:flex; flex-wrap:wrap; gap:12px 30px;
+  font-size:13px; color:var(--fg-3);
+}
+.pl-meta b{ color:var(--fg-2); font-weight:500; }
+
+.pl-actions{ margin-top:30px; display:flex; flex-wrap:wrap; gap:12px; }
+
+/* 浮在卡片外的装饰条，负责"背景层"的视差，别让它盖住文字 */
+.pl-bar{
+  position:absolute; z-index:1;
+  height:1px; background:linear-gradient(90deg,transparent,var(--amber-dim),transparent);
+  pointer-events:none;
+}
+.pl-bar--a{ left:-4%; right:32%; top:6%; }
+.pl-bar--b{ left:46%; right:-6%; bottom:-4%; }
+
+/* ==========================================================================
+   6. 按钮
+   ========================================================================== */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:9px;
+  min-height:44px; padding:0 20px;
+  border-radius:var(--r-md);
+  border:1px solid var(--line-2);
+  background:var(--surface);
+  color:var(--fg);
+  font-size:14px; cursor:pointer;
+  transition:background .2s var(--ease-out), border-color .2s var(--ease-out), color .2s var(--ease-out);
+}
+.btn:hover{ background:var(--surface-2); border-color:var(--fg-3); color:var(--fg); }
+.btn:active{ background:var(--bg-lift); }
+
+.btn--primary{
+  background:var(--amber); border-color:var(--amber); color:var(--on-amber); font-weight:600;
+}
+.btn--primary:hover{ background:var(--amber-hi); border-color:var(--amber-hi); color:var(--on-amber); }
+
+.btn--ghost{ background:transparent; }
+
+.btn svg{ display:block; }
+
+/* ==========================================================================
+   7. 寄语（打字机）
+   ========================================================================== */
+.letter{
+  position:relative;
+  padding-left:clamp(0px,3vw,28px);
+  border-left:1px solid var(--line);
+}
+.letter__body{
+  font-size:clamp(15px,2.6vw,17px);
+  line-height:2;
+  color:var(--fg-2);
+  white-space:pre-wrap;
+  min-height:5em;
+}
+.letter__body .sig{ color:var(--fg); }
+
+/* 打字光标 */
+.caret{
+  display:inline-block;
+  width:2px; height:1.05em;
+  margin-left:2px;
+  vertical-align:-.16em;
+  background:var(--amber);
+  animation:blink 1.05s step-end infinite;
+}
+@keyframes blink{ 0%,100%{opacity:1} 50%{opacity:0} }
+
+.letter__tools{ margin-top:26px; display:flex; gap:12px; flex-wrap:wrap; }
+
+/* ==========================================================================
+   8. 座位档案
+   ========================================================================== */
+.seat{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:1px;
+  background:var(--line);
+  border:1px solid var(--line);
+  border-radius:var(--r-lg);
+  overflow:hidden;
+}
+@media (min-width:560px){ .seat{ grid-template-columns:repeat(2,1fr); } }
+@media (min-width:820px){ .seat{ grid-template-columns:repeat(3,1fr); } }
+.seat__cell{
+  background:var(--bg-lift);
+  padding:22px 20px;
+}
+.seat__k{
+  display:block;
+  font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--fg-3); margin-bottom:8px;
+}
+.seat__v{ font-size:16px; color:var(--fg); }
+
+/* 还带着 _ 或 X 的值，说明学弟还没填。用一个克制的虚线标出来，
+   不至于看起来像页面坏了，也一眼能看出哪儿要改。 */
+.todo{
+  font-style:normal;
+  color:var(--amber);
+  border-bottom:1px dashed var(--amber-dim);
+  cursor:help;
+}
+
+/* ==========================================================================
+   9. 记忆碎片（横滑 + 中心聚焦）
+   ========================================================================== */
+.rail-wrap{ position:relative; }
+
+.rail{
+  display:flex;
+  gap:16px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scroll-snap-type:x mandatory;
+  scroll-padding-inline:0;
+  padding:8px 0 20px;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.rail::-webkit-scrollbar{ display:none; }
+/* 让第一张和最后一张能停在正中间 */
+.rail::before,.rail::after{
+  content:""; flex:0 0 max(0px, calc(50% - 150px));
+}
+
+.card{
+  flex:0 0 300px;
+  scroll-snap-align:center;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--r-lg);
+  overflow:hidden;
+  transform-origin:50% 50%;
+  will-change:transform,opacity;
+}
+
+.card__media{
+  display:block; width:100%; padding:0;
+  border:0; background:var(--bg-lift); cursor:zoom-in;
+  position:relative; overflow:hidden;
+  border-bottom:1px solid var(--line);
+}
+.card__media svg,.card__media img{ display:block; width:100%; height:auto; aspect-ratio:4/3; object-fit:cover; }
+.card__media::after{
+  content:""; position:absolute; inset:0;
+  background:var(--tint-0); transition:background .25s var(--ease-out);
+}
+.card__media:hover::after{ background:var(--tint-1); }
+
+.card__tag{
+  position:absolute; left:10px; bottom:10px; z-index:1;
+  padding:3px 8px; border-radius:var(--r-sm);
+  background:var(--on-photo-bg);
+  border:1px solid var(--on-photo-line);
+  font-size:11px; letter-spacing:.08em; color:var(--on-photo-fg);
+}
+
+.card__body{ padding:20px; }
+.card__title{ font-size:16px; margin-bottom:8px; }
+.card__text{ font-size:14px; color:var(--fg-2); }
+
+.card__list{ margin-top:12px; font-size:14px; color:var(--fg-2); }
+.card__list li{ padding-left:14px; position:relative; }
+.card__list li + li{ margin-top:6px; }
+.card__list li::before{
+  content:""; position:absolute; left:0; top:.72em;
+  width:5px; height:1px; background:var(--amber-dim);
+}
+
+/* 卡片被拉齐到同一高度，纯文字卡内容居中，免得底下空一大块 */
+.card--text-only{ display:flex; flex-direction:column; justify-content:center; }
+
+.rail-nav{
+  display:flex; align-items:center; gap:10px;
+  margin-top:4px;
+}
+.rail-dots{ display:flex; gap:6px; margin-left:auto; }
+.rail-dots i{
+  width:16px; height:2px; background:var(--line-2);
+  transition:background .3s var(--ease-out), width .3s var(--ease-out);
+}
+.rail-dots i.on{ background:var(--amber); width:26px; }
+.rail-hint{ font-size:12px; color:var(--fg-3); }
+
+.iconbtn{
+  width:44px; height:44px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border:1px solid var(--line-2); border-radius:var(--r-md);
+  background:var(--surface); cursor:pointer;
+  transition:background .2s var(--ease-out), color .2s var(--ease-out);
+}
+.iconbtn:hover{ background:var(--surface-2); color:var(--amber); }
+
+/* ==========================================================================
+   10. 生存指南（第二个液态 Tab）
+   ========================================================================== */
+.guide__tabs{
+  position:relative;
+  display:flex; gap:2px;
+  overflow-x:auto; scrollbar-width:none;
+  border-bottom:1px solid var(--line);
+  margin-bottom:28px;
+}
+.guide__tabs::-webkit-scrollbar{ display:none; }
+
+.guide__ind{
+  position:absolute; left:0; bottom:-1px;
+  height:2px; width:0;
+  background:var(--amber);
+  pointer-events:none;
+}
+
+.guide__tab{
+  flex:0 0 auto;
+  min-height:44px; padding:0 16px;
+  display:inline-flex; align-items:center;
+  background:none; border:0; cursor:pointer;
+  font-size:14px; color:var(--fg-3);
+  white-space:nowrap; position:relative; z-index:1;
+  transition:color .22s var(--ease-out);
+}
+.guide__tab[aria-selected="true"]{ color:var(--fg); font-weight:600; }
+.guide__tab:hover{ color:var(--fg-2); }
+
+.guide__panel + .guide__panel{ margin-top:0; }
+.guide__panel[hidden]{ display:none; }
+
+.tips{ display:grid; gap:14px; }
+.tip{
+  display:grid; grid-template-columns:auto 1fr; gap:16px;
+  padding:18px 20px;
+  background:var(--bg-lift);
+  border:1px solid var(--line);
+  border-radius:var(--r-md);
+}
+.tip__n{
+  font-size:12px; color:var(--amber-dim);
+  font-variant-numeric:tabular-nums; letter-spacing:.08em;
+  padding-top:3px;
+}
+.tip__t{ font-size:15px; color:var(--fg-2); }
+.guide__panel{ animation:panelIn .32s var(--ease-out) both; }
+@keyframes panelIn{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none} }
+
+/* ==========================================================================
+   11. 传承证书
+   ========================================================================== */
+.cert-box{ display:grid; gap:26px; }
+@media (min-width:820px){
+  .cert-box{ grid-template-columns:1.15fr .85fr; align-items:start; gap:36px; }
+}
+
+.cert{
+  position:relative;
+  background:linear-gradient(180deg,var(--surface) 0%, var(--bg-lift) 100%);
+  border:1px solid var(--line-2);
+  border-radius:var(--r-lg);
+  padding:clamp(24px,4vw,38px);
+}
+.cert::before{
+  content:""; position:absolute; inset:9px;
+  border:1px solid var(--line); border-radius:var(--r-md);
+  pointer-events:none;
+}
+.cert__kicker{
+  font-size:11px; letter-spacing:.24em; text-transform:uppercase;
+  color:var(--fg-3); text-align:center;
+}
+.cert__title{
+  text-align:center; margin-top:12px;
+  font-size:clamp(20px,3.6vw,26px); color:var(--fg);
+}
+.cert__sub{
+  text-align:center; margin-top:6px;
+  font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--amber-dim);
+}
+.cert__rule{
+  height:1px; margin:24px auto;
+  background:linear-gradient(90deg,transparent,var(--line-2),transparent);
+}
+.cert__rows{ display:grid; gap:12px; }
+.cert__row{
+  display:flex; justify-content:space-between; align-items:baseline;
+  gap:8px 16px; flex-wrap:wrap; font-size:14px;
+}
+.cert__row span:first-child{ color:var(--fg-3); flex:0 0 auto; }
+.cert__row span:last-child{ color:var(--fg); text-align:right; }
+.cert__foot{
+  margin-top:24px; padding-top:18px; border-top:1px solid var(--line);
+  display:flex; justify-content:space-between; gap:16px; align-items:flex-end;
+}
+.cert__no{ font-size:12px; letter-spacing:.1em; color:var(--fg-3); font-variant-numeric:tabular-nums; }
+.cert__sign{ font-size:15px; color:var(--amber); }
+
+.cert-side h3{ font-size:16px; margin-bottom:10px; }
+.cert-side p{ font-size:14px; color:var(--fg-2); margin-bottom:20px; }
+.cert-side .btn{ width:100%; }
+.cert-side .btn + .btn{ margin-top:10px; }
+.cert-note{
+  margin-top:16px; padding:12px 14px;
+  border:1px dashed var(--line-2); border-radius:var(--r-md);
+  font-size:12.5px; color:var(--fg-3); line-height:1.7;
+}
+
+/* ==========================================================================
+   12. 留言入口
+
+   这一块刻意不做表单。页面自己存的那种"留言"只留在这台设备上，
+   换台手机就没了，学姐也看不到 —— 所以直接把人送去博客评论区。
+   ========================================================================== */
+.wall-cta{
+  display:grid; gap:18px; justify-items:start;
+  padding:28px 26px;
+  background:var(--bg-lift);
+  border:1px solid var(--line);
+  border-radius:var(--r-lg);
+}
+.wall-cta__note{
+  font-size:14px; color:var(--fg-2); line-height:1.8;
+  max-width:54ch;
+}
+.wall-cta__foot{
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.wall-cta__hint{ font-size:12.5px; color:var(--fg-3); }
+/* 外链箭头：只在 hover 时往外挪一点，幅度小到不构成动效噪音 */
+.wall-cta__btn svg{ transition:transform .2s var(--ease-out); }
+.wall-cta__btn:hover svg{ transform:translate(2px,-2px); }
+
+/* ==========================================================================
+   13. 全屏图片查看器（共享元素展开 + 下滑手势）
+   ========================================================================== */
+.viewer{
+  position:fixed; inset:0; z-index:500;
+}
+.viewer[hidden]{ display:none; }
+
+.viewer__backdrop{
+  position:absolute; inset:0;
+  background:var(--viewer-bg);
+  -webkit-backdrop-filter:blur(6px);
+  backdrop-filter:blur(6px);
+}
+
+.viewer__stage{
+  position:absolute; inset:0;
+  display:grid; place-items:center;
+  pointer-events:none;
+  will-change:transform,opacity;
+}
+
+/* 被克隆的媒体：位置由 grid 居中决定，位移交给 transform，只动合成层 */
+.viewer__media{
+  position:relative;
+  margin:0; padding:0; border:0;
+  -webkit-appearance:none; appearance:none;
+  pointer-events:auto;
+  cursor:grab;
+  touch-action:none;
+  box-shadow:var(--shadow-2);
+  outline:1px solid var(--line-2);
+  border-radius:var(--r-md);
+  overflow:hidden;
+  background:var(--bg-lift);
+  display:block;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+/* 克隆过来的"示例图"角标在全屏里没意义，藏掉 */
+.viewer__media .card__tag{ display:none; }
+
+.viewer__media:active{ cursor:grabbing; }
+.viewer__media svg,.viewer__media img{ display:block; width:100%; height:100%; object-fit:cover; }
+.viewer__media.is-flying{ transition:transform .42s var(--ease-out); }
+
+.viewer__bar{
+  position:absolute; left:0; right:0; bottom:0;
+  padding:16px var(--pad) calc(18px + env(safe-area-inset-bottom));
+  display:flex; align-items:flex-end; gap:16px;
+  background:linear-gradient(180deg,transparent,var(--viewer-fade) 42%);
+  pointer-events:none;
+}
+.viewer__cap{ pointer-events:auto; max-width:62ch; }
+.viewer__cap h3{ font-size:15px; margin-bottom:4px; }
+.viewer__cap p{ font-size:13px; color:var(--fg-2); }
+.viewer__hint{ font-size:11.5px; color:var(--fg-3); margin-top:8px; letter-spacing:.04em; }
+.viewer__close{
+  margin-left:auto; pointer-events:auto;
+  width:44px; height:44px; flex:0 0 auto;
+  display:grid; place-items:center;
+  background:var(--chip-bg);
+  border:1px solid var(--line-2); border-radius:var(--r-md);
+  cursor:pointer;
+  transition:background .2s var(--ease-out);
+}
+.viewer__close:hover{ background:var(--surface-2); color:var(--amber); }
+.viewer__err{
+  padding:40px; text-align:center; color:var(--fg-2); font-size:14px;
+}
+
+body.is-locked{ overflow:hidden; }
+
+/* ==========================================================================
+   14. 底部弹层（秘密基地）
+   ========================================================================== */
+.sheet{
+  position:fixed; inset:0; z-index:600;
+  display:grid; align-items:end;
+}
+.sheet[hidden]{ display:none; }
+.sheet__backdrop{ position:absolute; inset:0; background:var(--scrim); }
+.sheet__panel{
+  position:relative;
+  max-width:560px; width:100%;
+  margin:0 auto;
+  background:var(--surface);
+  border-top:1px solid var(--line-2);
+  border-radius:var(--r-lg) var(--r-lg) 0 0;
+  padding:26px var(--pad) calc(30px + env(safe-area-inset-bottom));
+  max-height:82svh; overflow-y:auto;
+  animation:sheetUp .34s var(--ease-out) both;
+}
+@keyframes sheetUp{ from{transform:translateY(24px); opacity:0} to{transform:none; opacity:1} }
+.sheet__head{
+  display:flex; align-items:center; gap:14px; margin-bottom:6px;
+}
+.sheet__head h3{ font-size:17px; }
+.sheet__head .iconbtn{ margin-left:auto; }
+.sheet__sub{ font-size:13px; color:var(--fg-3); margin-bottom:20px; }
+.sheet__list li{
+  padding:14px 0; border-top:1px solid var(--line);
+  font-size:14px; color:var(--fg-2);
+}
+.sheet__list li:first-child{ border-top:0; }
+.sheet a.link{
+  display:flex; align-items:center; gap:10px;
+  color:var(--fg); font-size:14px;
+}
+.sheet a.link:hover{ color:var(--amber); }
+.sheet a.link span:first-child{ flex:0 0 auto; }
+
+/* ==========================================================================
+   15. 时段提示条
+   ========================================================================== */
+.toast{
+  position:fixed; left:50%; z-index:200;
+  bottom:calc(20px + env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  display:flex; align-items:center; gap:14px;
+  max-width:min(520px, calc(100vw - 32px));
+  padding:12px 12px 12px 18px;
+  background:var(--surface);
+  border:1px solid var(--line-2);
+  border-radius:var(--r-md);
+  box-shadow:var(--shadow-3);
+  font-size:13.5px; color:var(--fg-2);
+  animation:toastIn .4s var(--ease-out) both;
+}
+@keyframes toastIn{ from{transform:translate(-50%,16px); opacity:0} to{transform:translate(-50%,0); opacity:1} }
+.toast button{
+  width:32px; height:32px; flex:0 0 auto;
+  display:grid; place-items:center;
+  background:none; border:0; border-radius:var(--r-sm);
+  color:var(--fg-3); cursor:pointer;
+}
+.toast button:hover{ color:var(--fg); }
+
+/* ==========================================================================
+   16. 页脚
+   ========================================================================== */
+.foot{
+  max-width:var(--maxw); margin:0 auto;
+  padding:52px var(--pad) 72px;
+  border-top:1px solid var(--line);
+  font-size:13px; color:var(--fg-3);
+}
+.foot__row{ display:flex; flex-wrap:wrap; gap:14px 28px; align-items:center; }
+.foot a{ color:var(--fg-2); }
+.foot a:hover{ color:var(--amber); }
+.foot details{ margin-top:22px; }
+.foot summary{
+  cursor:pointer; color:var(--fg-3); font-size:12.5px;
+  letter-spacing:.06em; min-height:32px; display:flex; align-items:center;
+}
+.foot summary:hover{ color:var(--fg-2); }
+.foot__doc{
+  margin-top:14px; padding:18px 20px;
+  background:var(--bg-lift); border:1px solid var(--line);
+  border-radius:var(--r-md); color:var(--fg-3);
+  font-size:12.5px; line-height:1.9;
+}
+.foot__doc b{ color:var(--fg-2); font-weight:500; }
+.foot__doc code{
+  font-size:12px; color:var(--amber);
+  background:var(--tint-2);
+  padding:1px 5px; border-radius:var(--r-sm);
+}
+
+/* ==========================================================================
+   17. 小屏微调
+   ========================================================================== */
+@media (max-width:600px){
+  .nav__brand b{ display:none; }
+  /* 7 个标签在 360px 窄屏也要全部露出来；加上主题开关后又挤掉一截，
+     所以内边距和间距再收一档，但字号与文案不动。
+     320px 这类极窄屏仍由 .tabs 的 overflow-x 兜底，选中项会自动滚进视野。 */
+  .nav{ padding-left:10px; padding-right:10px; gap:8px; }
+  .tabs__tab{ padding:0 4px; font-size:13px; }
+  .themebtn{ width:30px; height:30px; }
+  .card{ flex-basis:262px; }
+  .rail::before,.rail::after{ flex-basis:max(0px, calc(50% - 131px)); }
+  .sec{ padding-left:20px; padding-right:20px; }
+}
+
+/* 证书行在窄屏改成上下堆叠。「承接座位」拼接后文字太长，
+   横排时末尾几个字会被挤到第二行，右对齐下看着像掉字。 */
+@media (max-width:480px){
+  .cert__row{ flex-direction:column; align-items:flex-start; gap:2px; }
+  .cert__row span:last-child{ text-align:left; }
+}
+
+/* ==========================================================================
+   18. 减少动效偏好 —— 一律降级为直接切换，功能不减
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+  .js .reveal{ opacity:1 !important; transform:none !important; }
+  .card{ transform:none !important; opacity:1 !important; }
+  /* 视差是纯装饰，关掉不影响任何内容 */
+  .parallax__layer[data-depth]{ transform:none !important; }
+}
+
+/* 打印 / 导出 PDF 时不该有东西是藏起来的 */
+@media print{
+  .js .reveal{ opacity:1 !important; transform:none !important; }
+  .nav,.progress,.toast{ display:none; }
+}
+</style>
+</head>
+
+<body data-page-node-id="kETFGozG1XEs4w8tsrRJWm">
+<a class="skip" href="#main" data-page-node-id="M4UpZq0E3jyfnZzKpQd2a2">跳到正文</a>
+
+<!-- ===================== 顶部导航 ===================== -->
+<header class="nav" data-page-node-id="wQgh2F2A2pjbX2Bz7OGvbE">
+  <button class="nav__brand" id="brand" type="button" aria-label="时空胶囊，连点五次有惊喜" data-page-node-id="BHUIa9v3sykiCW2RznvkfS">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" data-page-node-id="SPHdHF8wPKknPQxZ4MHnpe">
+      <circle cx="12" cy="12" r="8.2" data-page-node-id="kS7LEsaYxZEfvGRTPm83jy"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none" data-page-node-id="Du2ZQehAEMUKcqAxF4aogf"/>
+    </svg>
+    <b data-page-node-id="TkgNpjmXwl1HpICu8VfNkm">时空胶囊</b>
+  </button>
+
+  <nav class="tabs" id="navTabs" role="tablist" aria-label="页面导航" data-page-node-id="Swpcl6MctN11nTXeHfO4Nd">
+    <span class="tabs__ind" id="navInd" aria-hidden="true" data-page-node-id="fshWi0DFkLh5iQE2uCcYaN"></span>
+    <button class="tabs__tab" role="tab" data-target="cover"   aria-selected="true"  tabindex="0"  aria-label="封面" data-page-node-id="NpBQYFd9SuIdHNcnJhkIvx">封面</button>
+    <button class="tabs__tab" role="tab" data-target="letter"  aria-selected="false" tabindex="-1" aria-label="寄语" data-page-node-id="vULeCyMHMg9H4jsI0xrkI1">寄语</button>
+    <button class="tabs__tab" role="tab" data-target="seat"    aria-selected="false" tabindex="-1" aria-label="座位" data-page-node-id="YGbWv53yfDueNvMmJEUECx">座位</button>
+    <button class="tabs__tab" role="tab" data-target="memory"  aria-selected="false" tabindex="-1" aria-label="记忆" data-page-node-id="2T0aBRSX4LGCIPBoaaKXu7">记忆</button>
+    <button class="tabs__tab" role="tab" data-target="tips"    aria-selected="false" tabindex="-1" aria-label="指南" data-page-node-id="TMx0g1piUuWKBsPAyFTCII">指南</button>
+    <button class="tabs__tab" role="tab" data-target="cert"    aria-selected="false" tabindex="-1" aria-label="传承" data-page-node-id="JN1CaJqWECTVeZUbhwDWKD">传承</button>
+    <button class="tabs__tab" role="tab" data-target="wall"    aria-selected="false" tabindex="-1" aria-label="留言" data-page-node-id="w5T3pEZfWwi1lEVQlnGKs8">留言</button>
+  </nav>
+
+  <button class="themebtn" id="themeToggle" type="button" aria-label="切换到深色主题" title="切换深浅色主题">
+    <svg class="themebtn__sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+      <circle cx="12" cy="12" r="4.2"/>
+      <path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5l1.5 1.5M17 17l1.5 1.5M18.5 5.5 17 7M7 17l-1.5 1.5"/>
+    </svg>
+    <svg class="themebtn__moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+      <path d="M20.2 14.5A8.5 8.5 0 0 1 9.5 3.8a8.7 8.7 0 1 0 10.7 10.7Z"/>
+    </svg>
+  </button>
+</header>
+
+<div class="progress" aria-hidden="true" data-page-node-id="cVkE0JEFSIiwgLnoxwkGGE"><i id="progressBar" data-page-node-id="fTm23r879JkMGSVG28bfEI"></i></div>
+
+<main id="main" data-page-node-id="ygKXPeel5Jd8mWEyAsHGg0">
+
+  <!-- ===================== 封面 ===================== -->
+  <section class="cover" id="cover" aria-labelledby="coverTitle" data-page-node-id="yHvtROARxu9QMswyI9pBmQ">
+    <div class="parallax" id="parallax" data-page-node-id="vvQ5R9qgXPPzFBtKieTwA0">
+      <div class="parallax__layer pl-glow" data-depth="0.35" aria-hidden="true" data-page-node-id="g3rsDeqsxKD2atgfvoemzy"></div>
+      <div class="parallax__layer pl-grid" data-depth="0.7"  aria-hidden="true" data-page-node-id="g4cJki9Qw7SP5o3PLoIM6A"></div>
+      <div class="parallax__layer pl-bar pl-bar--a" data-depth="1.25" aria-hidden="true" data-page-node-id="KEGthFhaJVmEvBAqzAvbUw"></div>
+      <div class="parallax__layer pl-bar pl-bar--b" data-depth="0.95" aria-hidden="true" data-page-node-id="lDac5IPDUkbaUetCpf3Ig1"></div>
+
+      <div class="parallax__layer pl-card" data-depth="0.3" data-page-node-id="eOtPw1wpatDbKbCvSQ8uRM">
+        <span class="pl-nfc" data-page-node-id="x8Yu7OMj0FrF2D7uoEGGWB">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" data-page-node-id="QuGuj8QuPe5AjwTaNk9mNl">
+            <path d="M6 9a8 8 0 0 1 0 6" data-page-node-id="GxgHvp1SXqSEjTORvBZEdA"/><path d="M10 6.5a12 12 0 0 1 0 11" data-page-node-id="47LzVnyQk2Kh6FitOZcuRf"/>
+            <path d="M14 4a16 16 0 0 1 0 16" data-page-node-id="SWEUqcvStuWeUrvwEoFloG"/><circle cx="3.2" cy="12" r="1.1" fill="currentColor" stroke="none" data-page-node-id="4jrL85US9hnBf8GGvvd12g"/>
+          </svg>
+          NFC 已读取
+        </span>
+
+        <h1 class="pl-title" id="coverTitle" data-page-node-id="8CW2yxFs89dMV0Ga7gjpdx">
+          这个座位<br data-page-node-id="BPVdnHpfHrBZe43BBfNyHj">我把它<em data-page-node-id="6rsCXWGoYXFqCyhnjYCCsR">留给你</em>
+        </h1>
+
+        <p class="pl-sub" id="coverSub" data-page-node-id="UWIUDjEg6ubzj3txJzTGpV"></p>
+
+        <div class="pl-meta" data-page-node-id="yXVEl7pVofQr4AA22ww9uM">
+          <span data-page-node-id="KEpiAH9yZrtU2pQD9TBixi"><b id="metaSeat" data-page-node-id="3fCUB8OTxeo2zkF7XpSdqD"></b></span>
+          <span data-page-node-id="ZY8Y8qoEx1LysLxaqv0KJu"><b id="metaPeriod" data-page-node-id="Dh97hpMChPlA7Mhdxm7af6"></b></span>
+        </div>
+
+        <div class="pl-actions" data-page-node-id="aYN73m8PzpK3dnNZuC96Xg">
+          <button class="btn btn--primary" type="button" data-goto="letter" data-page-node-id="iSJC7wwDdAw1wREiR1PoZZ">
+            读一读学长的话
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" data-page-node-id="OLkVIWEXmDZmOwDQ59bbe5">
+              <path d="M5 12h13M13 6l6 6-6 6" data-page-node-id="HGqKyx8YA9cUmBkLzcDUdY"/>
+            </svg>
+          </button>
+          <a class="btn btn--ghost" id="blogLink" href="#" target="_blank" rel="noopener" data-page-node-id="kcrPcENBSCUIMYESrqhWXH">
+            去学长的博客
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" data-page-node-id="3qCiP8APJ2t7Dve6z1YlVT">
+              <path d="M8 6h10v10" data-page-node-id="EAlD53XmCU0OWzyYGxDjv7"/><path d="M18 6 7 17" data-page-node-id="ZtoQxsKSywXAphid8IbePM"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 寄语 ===================== -->
+  <section class="sec" id="letter" aria-labelledby="letterTitle" data-page-node-id="dee0pVbKzdkH3pWCwSSsg3">
+    <div class="sec__head reveal" data-page-node-id="LSmTHPV9ZtKJGWlsjlAkEh">
+      <span class="sec__idx" data-page-node-id="KnhOwOFetUXPUtjU3xt5YB">01 / 寄语</span>
+      <h2 class="sec__title" id="letterTitle" data-page-node-id="iJP2LLdFa7rLeifSVHcywy">写在搬走之前</h2>
+      <p class="sec__desc" data-page-node-id="ErvCGK0gCn4ANL6fmMzull">这段字是一个字一个字敲出来的，你也可以让它一口气全出来。</p>
+    </div>
+
+    <div class="letter reveal" data-page-node-id="Wma7nDjDzJ6gJ2lV67Gd9v">
+      <div class="letter__body" id="letterBody" data-page-node-id="UoFI7WtMkHOIPa0DXKjNhe"></div>
+      <div class="letter__tools" data-page-node-id="rKluCxSFOc5Wz4eY9iAjGz">
+        <button class="btn btn--ghost" type="button" id="letterSkip" data-page-node-id="HBpKgsJA37VIFPasx7zyEB">
+          跳过打字
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" data-page-node-id="Xlw5U1Ux85NzWFKdhzKSk8">
+            <path d="M6 5l7 7-7 7M14 5l7 7-7 7" data-page-node-id="nPTkhxHxoLT2Ae7Dhp4MbN"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 座位档案 ===================== -->
+  <section class="sec" id="seat" aria-labelledby="seatTitle" data-page-node-id="TD8ruBFJScv5BcoDQPCOaO">
+    <div class="sec__head reveal" data-page-node-id="GAy3BNCInqR5iel6GbxGs6">
+      <span class="sec__idx" data-page-node-id="WWqxsieYKaBxpDBxzVIoam">02 / 座位</span>
+      <h2 class="sec__title" id="seatTitle" data-page-node-id="UpzYdJh9Oc932955nltlEJ">座位档案</h2>
+      <p class="sec__desc" data-page-node-id="T0OjMZ2YCUzGVMG0PbxptM">这里我们呆了一年，现在是你们的了。</p>
+    </div>
+    <div class="seat reveal" id="seatGrid" data-page-node-id="9APEBQrxLUgAQTBuLMmEul"></div>
+  </section>
+
+  <!-- ===================== 记忆碎片 ===================== -->
+  <section class="sec" id="memory" aria-labelledby="memoryTitle" data-page-node-id="eROov5I3pRjfzUPywNeRoe">
+    <div class="sec__head reveal" data-page-node-id="ikLc30zVeDYArSAxGLlaPY">
+      <span class="sec__idx" data-page-node-id="FPhyKdiAbBfCNN1TtsedR5">03 / 记忆</span>
+      <h2 class="sec__title" id="memoryTitle" data-page-node-id="fGgDokwJb7eniGREsJRPAq">留下的几块碎片</h2>
+      <p class="sec__desc" data-page-node-id="eejpc1JDe32DG50eLp6UED">左右滑动看看。照片点开能放大，往下拖一下就收回去。</p>
+    </div>
+
+    <div class="rail-wrap reveal" data-page-node-id="BHPAN8L6tERET1cqYq1lIG">
+      <ul class="rail" id="rail" role="list" tabindex="0" aria-label="记忆碎片，可用左右方向键切换" data-page-node-id="BGrb2s2AfG8XNudhTBoYDp"></ul>
+      <div class="rail-nav" data-page-node-id="Ee1ISiHkYjIsNSxWDSDkKA">
+        <button class="iconbtn" type="button" id="railPrev" aria-label="上一张" data-page-node-id="nYCAxZPKhPJTR4RaHFPnt5">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" data-page-node-id="rMogfrizviMIDkyBGKWbLo">
+            <path d="M15 5l-7 7 7 7" data-page-node-id="GG2DyAFyyOuMRBMgTBsMzx"/>
+          </svg>
+        </button>
+        <button class="iconbtn" type="button" id="railNext" aria-label="下一张" data-page-node-id="ITGlsf75oT7P6yX5GUjdVj">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" data-page-node-id="FXkgTAlWTA4hnYsDOizcwJ">
+            <path d="M9 5l7 7-7 7" data-page-node-id="HnZHDrWaiJikQBi6FPA5Ym"/>
+          </svg>
+        </button>
+        <div class="rail-dots" id="railDots" aria-hidden="true" data-page-node-id="akoD8SCDWIbH0Jt8dLfc6E"></div>
+        <span class="rail-hint" data-page-node-id="7UqSkHrTLKKDPCgH5a6yO9">拖动 / 方向键</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 生存指南 ===================== -->
+  <section class="sec" id="tips" aria-labelledby="tipsTitle" data-page-node-id="D9vGvNjYnO1Z3HrlTc6TCf">
+    <div class="sec__head reveal" data-page-node-id="yJaKB2GwWYiBuYORi9xnh7">
+      <span class="sec__idx" data-page-node-id="D28vCLX2wGQ7n0MTAZXDu4">04 / 指南</span>
+      <h2 class="sec__title" id="tipsTitle" data-page-node-id="F7jfQHRHwdDatb3SsskoT4">生存指南</h2>
+      <p class="sec__desc" data-page-node-id="qeF0RVy2NjlL21GxQRRzBj">都是我踩过的坑，分类分好了，挑着看。</p>
+    </div>
+
+    <div class="reveal" data-page-node-id="IL1QX7L8DX5JZHe7C65cbn">
+      <div class="guide__tabs" id="guideTabs" role="tablist" aria-label="生存指南分类" data-page-node-id="YNbpcEJ2VW9lKxcyNfGbq4">
+        <span class="guide__ind" id="guideInd" aria-hidden="true" data-page-node-id="juf1Iizl9uRp9aDHsdZETL"></span>
+      </div>
+      <div id="guidePanels" data-page-node-id="iyQVIZENJBqmOi6ib3mOlF"></div>
+    </div>
+  </section>
+
+  <!-- ===================== 传承证书 ===================== -->
+  <section class="sec" id="cert" aria-labelledby="certTitle" data-page-node-id="7hLInQn9Bq3JFeQkrNqHt1">
+    <div class="sec__head reveal" data-page-node-id="MoZsx9zAlOsNmLkbBvFqP8">
+      <span class="sec__idx" data-page-node-id="BWkGlGeReXSL8snD0nHB07">05 / 传承</span>
+      <h2 class="sec__title" id="certTitle" data-page-node-id="EXUJD661AiQixqVTgUgimN">座位传承证书</h2>
+      <p class="sec__desc" data-page-node-id="d87FOX4W78ZiCY2ZA9XoJd">签个名的事。存张图，以后翻出来还能想起这天。</p>
+    </div>
+
+    <div class="cert-box reveal" data-page-node-id="8WoGm0oX9RFLnVUftMvDrV">
+      <div class="cert" id="certCard" role="img" aria-label="座位传承证书" data-page-node-id="ui3eA4EcGvAttJDWAoOwV7">
+        <p class="cert__kicker" data-page-node-id="abVzb31peJ2dOt0rQKR2QH">CAUC · 时空胶囊</p>
+        <h3 class="cert__title" id="certTitleText" data-page-node-id="J1SpLKalTooNTFHP0wlhMF"></h3>
+        <p class="cert__sub" id="certSubText" data-page-node-id="09skmVT3lMHWeF1B1zvYv1"></p>
+        <div class="cert__rule" data-page-node-id="ecnYB5c9tU0joCWpRV0yGE"></div>
+        <div class="cert__rows" data-page-node-id="RhBEFn8ge5tWeVlBmkvA8I">
+          <div class="cert__row" data-page-node-id="RfsU82TOATG4d3WnRUrIV4"><span data-page-node-id="AXmIHKOiiMn8EWP3hHFEGc">持证人</span><span id="certHolder" data-page-node-id="WfTdnCv8YOxxoPpxhYXLv7"></span></div>
+          <div class="cert__row" data-page-node-id="hHjcCueSYaE5Ln2YBwubNG"><span data-page-node-id="wrz0m7YGgA67aqtQllnOT2">承接座位</span><span id="certSeat" data-page-node-id="A9DUcDTqDDb0UNki9GTVD7"></span></div>
+          <div class="cert__row" data-page-node-id="aZLWRW7F49rbZnSwg90MsV"><span data-page-node-id="iZ7ElX4aia7yHPJ0CPCxgD">在座期间</span><span id="certPeriod" data-page-node-id="8SQ2kRdPNDmeQjCm1kCmd1"></span></div>
+          <div class="cert__row" data-page-node-id="oQYybpj4timXOjE0l2gAE6"><span data-page-node-id="Fw8tHdghIgyPb9DBkdf5Xi">签发日期</span><span id="certDate" data-page-node-id="EHa5XtNZTTChAle7Evb8ws"></span></div>
+        </div>
+        <div class="cert__foot" data-page-node-id="efcQqFmG4hTyANSqF0yC5j">
+          <span class="cert__no" id="certNo" data-page-node-id="4RoN5ua2cG0X7cbbdAQ4K8"></span>
+          <span class="cert__sign" id="certSign" data-page-node-id="QgaEbDiVvHWFNJOmdf4BsD"></span>
+        </div>
+      </div>
+
+      <div class="cert-side" data-page-node-id="Rn0EAGV7phGvWYE9VDN5AA">
+        <h3 data-page-node-id="j5NhKtWfihf6ZW813BbVo9">把这张证书带走</h3>
+        <p data-page-node-id="DA4491lm9zPRxMsQS3Z51G">点一下会就地画一张 1400 × 990 的 PNG，不存在服务器，图也不外传。</p>
+        <button class="btn btn--primary" type="button" id="certSave" data-page-node-id="BxtZpAQKlhQFYpi3Zzmbtl">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true" data-page-node-id="si70fJmQR0gNFVJmjIQ9cV">
+            <path d="M12 3v12" data-page-node-id="wZyJTztrwmq5on0UApW6uU"/><path d="M7 11l5 5 5-5" data-page-node-id="X4kdYHRZIXRGZbX19k5eXA"/><path d="M4 20h16" data-page-node-id="OixkOEiwnuSniCaktu7c6T"/>
+          </svg>
+          下载证书图片
+        </button>
+        <button class="btn btn--ghost" type="button" id="certCopy" data-page-node-id="siAoCkQOUdIElPGO9UANSs">复制证书编号</button>
+        <p class="cert-note" id="certNote" data-page-node-id="osH3HgKNkU0zHEgbKBsCBu">手机上如果没弹出下载，长按上面那张证书截图也行。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 留言入口 ===================== -->
+  <section class="sec" id="wall" aria-labelledby="wallTitle" data-page-node-id="FCAXpe0o4FIKp3UoPXMz6b">
+    <div class="sec__head reveal" data-page-node-id="zMwWdnQ7uHQ77dHbGllFjS">
+      <span class="sec__idx" data-page-node-id="M4IQWdaomNiIyZ3mSke4pS">06 / 留言</span>
+      <h2 class="sec__title" id="wallTitle" data-page-node-id="DuQkyEauAyM3dPMxjBs11H">留言墙</h2>
+      <p class="sec__desc" id="wallDesc" data-page-node-id="xxCQFGzL0oChgT3GjnSA5X">想说的话，去博客那边留。我一条条都会看。</p>
+    </div>
+
+    <div class="wall-cta reveal" data-page-node-id="SHKv9w0X4erIUNmG72nL45">
+      <p class="wall-cta__note" id="wallNote">留言收在博客的评论区里，方便我一条条看到、也能回你。这个页面自己不存留言 —— 存在页面里的留言只留在这台设备上，别人看不到。</p>
+      <div class="wall-cta__foot" data-page-node-id="Zo1Qsww8xwBVySQUTEtesl">
+        <a class="btn btn--primary wall-cta__btn" id="wallGoto" href="https://blog.224418.xyz/comments/" target="_blank" rel="noopener" data-page-node-id="tuI0yON60GBYmEcjYe91Nf">
+          <span id="wallGotoLabel">去博客留言</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+            <path d="M8 6h10v10"/><path d="M18 6 7 17"/>
+          </svg>
+        </a>
+        <span class="wall-cta__hint" id="wallHint">会打开新标签页</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ===================== 页脚 ===================== -->
+<footer class="foot" data-page-node-id="eNwOqQ0y9TB18l0l1ZUNrF">
+  <div class="foot__row" data-page-node-id="0Tz4IHGmWet2fSOrXGfkt4">
+    <span id="footSig" data-page-node-id="V8Gl1lSxciYRuROPNcMcOk"></span>
+    <a id="footBlog" href="#" target="_blank" rel="noopener" data-page-node-id="JeZdBoJ5DPmkHJRDynqVUH">博客</a>
+    <a href="#cover" data-page-node-id="PRD0ZdU72nN5szCWYZmlF3">回到顶部</a>
+  </div>
+
+  <details data-page-node-id="75Mvq0l3EorhH729zHpuQE">
+    <summary data-page-node-id="bV6u1TrW9QuehRxKsxLlUC">这一页用了哪些动效，为什么是这几个</summary>
+    <div class="foot__doc" data-page-node-id="2K1dbMhJt8tx3F43NNZPeu">
+      <p data-page-node-id="2hM0zsL0Fp1PsWBOaYcyTl">整页只上了五种效果，来源是「8 种有质感的交互动效」的场景选型表：</p>
+      <p data-page-node-id="936zs0GrUoUZeDuA7ecbl2">· <b data-page-node-id="1XAVXmors7QXTGypAMWZVt">3D 视差</b>用在封面，前景的网格和光晕比正文卡片动得多，鼠标一移就有纵深。</p>
+      <p data-page-node-id="wQhYOfxBFPKtjt7Be6DwwG">· <b data-page-node-id="zjE0BhY5nf7zrT6RMmzcke">中心聚焦</b>用在记忆碎片的横滑条，离中心越远的卡片越小越淡，但不低于 <code data-page-node-id="5lbwZN6c7QY2xKckL0UVTL">0.86</code> 倍，保证还读得清。</p>
+      <p data-page-node-id="Z7kdsRmVGR8WujB2mhUTvh">· <b data-page-node-id="WZDphbsvxWjtaOd9mDdUeC">液态 Tab</b>用在顶部导航和生存指南，两处共用同一段实现。指示器先拉长再收拢，快速连点会从当前形态接续，不会排队。</p>
+      <p data-page-node-id="ih1h9xyt2UKnXYeYUybjBH">· <b data-page-node-id="VubkmvZsBD3oRDqMxp4jiL">图片展开</b>和<b data-page-node-id="PCw5fhmoLeEwp83pDVHcmV">手势转场</b>用在照片：从缩略图连续放大到全屏，下拉超过 28% 或松手够快就关掉，否则弹回原位。</p>
+      <p data-page-node-id="BBvrAdTvjfneIdEJms9SS5">剩下的三种没上：磁吸会干扰按钮命中区，液态形变没有可拖拽场景，碰撞回弹不适合表单和正文。参数都收在 <code data-page-node-id="0jKWTOiskKQEaFdTJIReo6">CONFIG.motion</code> 里，想调就调。</p>
+      <p data-page-node-id="wmrzK8549jgLHxckwCqdSl">系统开了「减少动态效果」的话，以上全部降级成直接切换，功能一个不少。</p>
+    </div>
+  </details>
+</footer>
+
+<!-- ===================== 全屏图片查看器 ===================== -->
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="查看照片" hidden data-page-node-id="kcUHchn4t8cPhEo4WDz0Uf">
+  <div class="viewer__backdrop" data-close data-page-node-id="FF8YRijkfcv5zBrQGKDyFb"></div>
+  <div class="viewer__stage" id="viewerStage" data-page-node-id="UCrJjH2DiB0YbiZhjXFGGW"></div>
+  <div class="viewer__bar" data-page-node-id="ptPEfnoINduEAgHxIAj38g">
+    <div class="viewer__cap" data-page-node-id="5os6rzuGcOKTOXZfbYohTv">
+      <h3 id="viewerTitle" data-page-node-id="m5h4XGl34yyhfddPtTj174"></h3>
+      <p id="viewerCap" data-page-node-id="rdB46VZPa7lGg8uxlKWD6K"></p>
+      <p class="viewer__hint" id="viewerHint" data-page-node-id="WK2FmQdNuZZK21YkXnAnLz">往下拖，或者按 Esc 关掉</p>
+    </div>
+    <button class="viewer__close" type="button" data-close aria-label="关闭" data-page-node-id="K1RIr4mLYnhMWdigPAmxyv">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" data-page-node-id="2DwgWqC2b90Q2DkbwEPU3X">
+        <path d="M6 6l12 12M18 6L6 18" data-page-node-id="PO6lsgat4ZMP44mWX7P424"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- ===================== 秘密基地 ===================== -->
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden data-page-node-id="8JXq6hSuSL9G8J1JaZoimV">
+  <div class="sheet__backdrop" data-close-sheet data-page-node-id="Tmcd2AGZf6V5nCMzF8faCd"></div>
+  <div class="sheet__panel" data-page-node-id="jmmLbImZ2FZvbOvEPLjpMd">
+    <div class="sheet__head" data-page-node-id="jRnxF3emHFTBVZ0MG5aSFE">
+      <h3 id="sheetTitle" data-page-node-id="wC87XWdYoXrJmYMn4W9EC6">学长の秘密基地</h3>
+      <button class="iconbtn" type="button" data-close-sheet aria-label="关闭" data-page-node-id="NLlhJp1T7kgkCHUFVtiwOy">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" data-page-node-id="8bZv5JTAPltTLvJd0kMa1k">
+          <path d="M6 6l12 12M18 6L6 18" data-page-node-id="YmwCqhWFw5GKVmqWCkqDcx"/>
+        </svg>
+      </button>
+    </div>
+    <p class="sheet__sub" data-page-node-id="CRR0eCLKjGzU4yHbYzvASt">你居然连点了五次标题，那这个给你。</p>
+    <ul class="sheet__list" id="sheetList" data-page-node-id="mywPmehfEwqG75pAGhZK6H"></ul>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   ★★★ 你要改的东西，全在这下面 ★★★
+   改完直接刷新浏览器就生效，不用编译、不用装任何东西。
+   ========================================================================== */
+const CONFIG = {
+
+  /* ---------- 学长信息 ---------- */
+  senior: {
+    name: 'TangShiMei',
+    major: '交通工程',
+    grade: '2025级',
+    signature: '想和你从新认识一次，从你叫什么开始',
+    // 头像留空就不显示，填了会出现在寄语末尾
+    avatar: '',
+    // 封面右上角那个"去博客"按钮
+    redirectUrl: 'https://blog.224418.xyz',
+  },
+
+  /* ---------- 留言入口 ----------
+     留言不放在页面里自己存 —— 那种留言只留在你这台设备上，别人看不到。
+     这里只做一个跳转按钮，指向博客评论区。改 url 就能换地方。 */
+  guestbook: {
+    url: 'https://blog.224418.xyz/comments/',
+    label: '去博客留言',
+    desc: '想说的话，去博客那边留。我一条条都会看。',
+    note: '留言收在博客的评论区里，方便我一条条看到、也能回你。这个页面自己不存留言 —— 存在页面里的留言只留在这台设备上，别人看不到。',
+    hint: '这将会打开一个新的页面',
+  },
+
+  /* ---------- 寄语正文 ----------
+     数组里一个元素是一行，空字符串 '' 就是空一行。
+     打字机会按顺序一个字一个字敲出来。 */
+  message: [
+    '嗨，学弟。',
+    '',
+    '我是 2025 级交通工程的傥学长，也称作TangShiMei，',
+    '（PS：别问我为啥叫这个，去博客看 ￣﹃￣ ）',
+    '',
+    '其实这个位置不是我的床位，我是1床，也就是进门左手边的那个',
+    '我偷偷把这个贴到4床位你们另一个学长的桌子下面了。（他知道这个的）',
+    '他也有博客，就是 blog.26060.best ',
+    '',
+    '怎么样，找到这个NFC贴纸然后有这样一个页面是什么感觉',
+    '是不是很神奇？',
+    '我也不知道有人看见的时候是什么时候了，不过没有关系，这个域名的年龄是10年，至少10年后都能访问到这个页面。',
+    '到时候要是域名过期了，你们也可以贴一个新的NFC贴纸，然后联系我，我弄一个新域名进去',
+    '',
+    '——于 2026 年 7 月 9 日粘贴。',
+  ],
+
+  /* ---------- 座位档案 ----------
+     下面带 _ 的值都是占位符，页面上会用琥珀色虚线标出来，照着换成真实信息。 */
+  seat: {
+    campus: '东丽校区',
+    building: '北院',
+    dormitory: '25号楼',
+    room: '211',
+    position: 'g117.35147633,39.11131245',
+    period: '2025/09/07 — 2026/07/10',
+  },
+
+  /* ---------- 记忆碎片 ----------
+     卡片顺序就是滑动顺序，可以随意增删。 */
+  memory: {
+    deskMark: '桌面没啥印记，你自己找找吧，还是留下过不少东西的。记住，学长留下的东西都有它存在的道理！',
+    // 音乐卡：填网易云歌曲 ID 就能跳过去，留空这张卡会变成一句白。
+    musicId: '',
+    musicTitle: '',
+    // 照片：填图片地址（相对路径或网址都行）。
+    // 留空就用内置的三张示例图，方便你看到放大动效。填了就用你自己的。
+    photos: [
+      // { src: 'assets/window.jpg', title: '从这里看出去', caption: '下午四点，光刚好落在桌角。' },
+    ],
+    // 额外想塞的纯文字卡
+    extras: [],
+  },
+
+  /* ---------- 生存指南 ----------
+     每个分类一个 Tab，分类名随便改。 */
+  guide: [
+    {
+      label: '吃饭',
+      items: [
+        '北二食堂二楼的烤盘饭最权威，不容置疑',
+        '北一食堂的香锅也很好',
+        '地铁口的牛逼师傅的炒饭也超级好吃！！怀念！呜呜呜',
+      ],
+    },
+    {
+      label: '学习',
+      items: [
+        '图书馆一楼，二楼，三楼，四楼都有自习室，想去自习直接去，不用预约，相信学长！OωO',
+        '寒假前的期末周，要是去图书馆不想去，可以骑着单车去北25的教室，109好像，人少得很',
+      ],
+    },
+    {
+      label: '生活',
+      items: [
+        '校园跑尽早，血泪教训，要是跑的话，一鼓作气给他快点弄完',
+        '湖边的亭子有几张椅子，平时没有事儿了也可以去那里，我超喜欢那里的，我把它称作 “湖心亭” ',
+      ],
+    },
+    {
+      label: '社团',
+      items: [
+        '社团我不太知道，我大一就参加了一个排球社，然后大一上啥事情没有，然后大一下的时候没有线下的啥事情就',
+        '排球社根本不打排球，都是给校队和比赛服务什么的，所以你要是想要打排球，可以平常去南苑的排球场什么的，或者参加校队',
+        '真的，去体育馆打乒乓球不用预约，直接去就行了。被逮到直接走就行，这一点我已经帮你们踩过了，哈哈哈',
+      ],
+    },
+    {
+      label: '体测',
+      items: [
+        '男生们的引体向上真的不简单，最好平常多练一下俯卧撑和核心力量',
+      ],
+    },
+  ],
+
+  /* ---------- 传承证书 ---------- */
+  certificate: {
+    title: '宿舍传承证书',
+    subtitle: 'Seat Heritage Certificate',
+    number: 'CAUC-2026-0001',
+  },
+
+  /* ---------- 秘密基地（连点标题五次） ---------- */
+  secretBase: [
+    { type: 'text', content: '永远相信美好的事情即将发生。' },
+    { type: 'text', content: '高数不会骗人，不会就是不会。' },
+    { type: 'link', title: '推荐奇妙工具箱', url: 'https://www.magicalbox.cn/' },
+    { type: 'link', title: '学校官网', url: 'https://www.cauc.edu.cn/zhv5/' },
+  ],
+
+  chickenSoup: [
+    '努力不一定成功，但不努力真的很轻松。',
+    '大学生活三点一线：教室、食堂、宿舍，还有床上。',
+    '大一觉得自己能改变世界，大二发现世界能改变你。',
+    '不要和室友比懒，你们都是冠军。',
+    '今天不学习，明天变垃圾。这句是真的。',
+  ],
+
+  /* ---------- 时段问候 ----------
+     按小时匹配，命中就弹一条底部提示。 */
+  greetings: {
+    23: '这么晚了还在刷手机？明天还有早八吧。',
+    0:  '午夜时分还在修仙，注意身体啊学弟。',
+    1:  '你认真的吗，快睡觉。',
+    2:  '快睡，明天的早八会杀了你的。',
+  },
+
+  /* ---------- 动效参数 ----------
+     这几个是唯一需要动脑调的地方，改小改大感受很直接。 */
+  motion: {
+    // 视差最大位移，单位 px。数字越大越飘，超过 30 就会晕。
+    // follow 是每帧向目标靠拢的比例：调大更贴手，调小更飘。0.12 大约 200ms 跟到位。
+    parallax: { depth: 16, follow: 0.12 },
+
+    // 中心聚焦的最弱端：中心是 1.0，两边衰减到这两个数。
+    // minScale 低于 0.8 文字就会糊，minOpacity 低于 0.5 会显得像坏了。
+    carousel: { minScale: 0.88, minOpacity: 0.55, follow: 0.2 },
+
+    // 液态指示器基准时长（ms）。尾边会自动按 1.35 倍拖长，这个比例就是"拉长再收拢"的来源。
+    tab: { duration: 300, tailRatio: 1.35, maxStretch: 1.7 },
+
+    // 全屏图：下拉超过视口高度这个比例，或者松手速度超过这个值（px/ms），就关掉。
+    viewer: { closeRatio: 0.28, closeVelocity: 0.6, openDuration: 420 },
+
+    // 打字机速度（ms / 字）
+    typewriter: { speed: 42 },
+  },
+};
+
+/* ==========================================================================
+   以下是为了让上面这份配置跑起来的所有代码。
+   一般情况下你不需要动。改样式往上翻 CSS 区，改文案就用 CONFIG。
+   ========================================================================== */
+(function () {
+  'use strict';
+
+  document.documentElement.classList.add('js');
+
+  /* ---------------------------------------------------------------- 工具 */
+
+  var clamp = function (v, a, b) { return v < a ? a : (v > b ? b : v); };
+  var lerp = function (a, b, t) { return a + (b - a) * t; };
+  var easeOutCubic = function (t) { return 1 - Math.pow(1 - t, 3); };
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+
+  /* 取一个 CSS 变量的当前值。canvas 的绘图 API 不认 var()，只能先读出来当普通颜色用。 */
+  function cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  /* 系统是否要求减少动效。这是全局开关，所有模块都要看它。 */
+  var mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var reduced = mqReduce.matches;
+  mqReduce.addEventListener('change', function (e) {
+    reduced = e.matches;
+    document.documentElement.classList.toggle('reduce', reduced);
+  });
+  document.documentElement.classList.toggle('reduce', reduced);
+
+  /* ---------------------------------------------------------------- 主题
+
+     初始的 data-theme 已经在 <head> 里定好了 —— 那一步不能挪到这里，
+     否则首帧会先闪一下另一种颜色。这里只负责"点一下换一套"并把它记住。 */
+
+  (function theme() {
+    var root = document.documentElement;
+    var btn = $('#themeToggle');
+    var timer = 0;
+
+    function apply(t, animate) {
+      /* 过渡只在切换的那一瞬间开，不干扰别处本来就有的动效。
+         图标本身不旋转 —— 那是纯装饰，这里不需要。 */
+      if (animate && !mqReduce.matches) {
+        root.classList.add('is-theming');
+        clearTimeout(timer);
+        timer = setTimeout(function () { root.classList.remove('is-theming'); }, 260);
+      } else {
+        root.classList.remove('is-theming');
+      }
+
+      root.setAttribute('data-theme', t);
+
+      /* 手机浏览器地址栏那一抹颜色也要跟着换 */
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', t === 'light' ? '#F7F4EE' : '#141210');
+      if (btn) btn.setAttribute('aria-label', t === 'light' ? '切换到深色主题' : '切换到浅色主题');
+    }
+
+    if (btn) {
+      apply(root.getAttribute('data-theme') === 'light' ? 'light' : 'dark', false);
+      btn.addEventListener('click', function () {
+        var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        apply(next, true);
+        try { localStorage.setItem('capsule.theme', next); } catch (e) { /* 隐私模式 */ }
+      });
+    }
+  })();
+
+  /* 只在真有东西要动的时候才跑的 rAF 循环。
+     上一个任务返回 false 就会被摘掉，全部摘掉后循环自己停 —— 这就是
+     "结束后清理渲染循环"那条要求的落点，别让它空转烧电。 */
+  var ticker = (function () {
+    var jobs = [];
+    var raf = 0;
+    function loop(t) {
+      for (var i = jobs.length - 1; i >= 0; i--) {
+        if (jobs[i](t) === false) jobs.splice(i, 1);
+      }
+      raf = jobs.length ? requestAnimationFrame(loop) : 0;
+    }
+    return {
+      add: function (fn) {
+        if (jobs.indexOf(fn) === -1) jobs.push(fn);
+        if (!raf) raf = requestAnimationFrame(loop);
+      },
+      remove: function (fn) {
+        var i = jobs.indexOf(fn);
+        if (i > -1) jobs.splice(i, 1);
+      }
+    };
+  })();
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function fmtDate(d) {
+    return d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+  }
+
+  /* 值里还留着 _ 或 X，说明来源是那份占位配置。
+     给它加一条虚线并附上 tooltip，页面不会显得像坏了，学弟也能一眼找到该改哪儿。*/
+  function fill(s) {
+    var v = String(s == null ? '' : s);
+    if (/[_X]/.test(v)) {
+      return '<em class="todo" title="在 CONFIG.seat 里改成真实信息">' + esc(v) + '</em>';
+    }
+    return esc(v);
+  }
+
+  /* 视口变化时重算缓存的尺寸。所有模块共用一个回调列表。 */
+  var resizeJobs = [];
+  var resizeRaf = 0;
+  window.addEventListener('resize', function () {
+    if (resizeRaf) return;
+    resizeRaf = requestAnimationFrame(function () {
+      resizeRaf = 0;
+      for (var i = 0; i < resizeJobs.length; i++) resizeJobs[i]();
+    });
+  }, { passive: true });
+
+  /* ------------------------------------------------------ 内置示例照片
+
+     照片区留空时用这三张顶上，让学弟一打开就能看见放大动效。
+     stroke 画出来的线稿，体积为零，风格也和整页一致。 */
+
+  /* 占位图要和卡片底色差开一档，否则它和卡片糊在一起，全屏展开时也会被遮罩吃掉。
+     颜色用 CSS 变量而不是写死的值 —— 切主题时这几张线稿会自己跟着变，不用重绘。
+     注意必须写在 style 里：presentation attribute（fill="..."）不认 var()。 */
+  var PH = {
+    bg:   'var(--ph-bg)',
+    soft: 'var(--ph-soft)',
+    line: 'var(--ph-line)',
+    gold: 'var(--amber)'
+  };
+
+  function svgWrap(inner) {
+    return '<svg viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">' + inner + '</svg>';
+  }
+
+  var PLACEHOLDERS = [
+    // 窗
+    svgWrap(
+      '<rect width="480" height="360" style="fill:' + PH.bg + '"/>' +
+      '<rect x="104" y="44" width="272" height="196" style="fill:' + PH.soft + '"/>' +
+      '<rect x="106" y="144" width="268" height="94" style="fill:' + PH.gold + '" opacity=".12"/>' +
+      '<g style="stroke:' + PH.line + '" stroke-width="2" fill="none">' +
+        '<rect x="104" y="44" width="272" height="196"/>' +
+        '<line x1="240" y1="44" x2="240" y2="240"/>' +
+        '<line x1="104" y1="142" x2="376" y2="142"/>' +
+      '</g>' +
+      '<rect x="64" y="240" width="352" height="7" style="fill:' + PH.line + '"/>' +
+      '<line x1="64" y1="306" x2="416" y2="306" style="stroke:' + PH.line + '" stroke-width="1.5"/>'
+    ),
+    // 桌
+    svgWrap(
+      '<rect width="480" height="360" style="fill:' + PH.bg + '"/>' +
+      '<rect x="0" y="196" width="480" height="164" style="fill:' + PH.soft + '"/>' +
+      '<g style="stroke:' + PH.line + '" stroke-width="1.4">' +
+        '<line x1="0" y1="232" x2="480" y2="232"/>' +
+        '<line x1="0" y1="278" x2="480" y2="278"/>' +
+      '</g>' +
+      '<circle cx="336" cy="132" r="44" style="fill:' + PH.gold + '" opacity=".13"/>' +
+      '<path d="M336 92 L336 42" style="stroke:' + PH.line + '" stroke-width="3"/>' +
+      '<rect x="96" y="152" width="128" height="88" rx="3" style="fill:' + PH.bg + ';stroke:' + PH.line + '" stroke-width="2"/>' +
+      '<line x1="96" y1="176" x2="224" y2="176" style="stroke:' + PH.line + '" stroke-width="2"/>' +
+      '<rect x="120" y="164" width="30" height="4" style="fill:' + PH.gold + '" opacity=".55"/>'
+    ),
+    // 走廊
+    svgWrap(
+      '<rect width="480" height="360" style="fill:' + PH.bg + '"/>' +
+      '<g style="stroke:' + PH.line + '" stroke-width="1.6" fill="none">' +
+        '<path d="M40 330 L172 118 L308 118 L440 330 Z"/>' +
+        '<path d="M120 330 L204 118"/><path d="M360 330 L276 118"/>' +
+        '<line x1="172" y1="118" x2="308" y2="118"/>' +
+      '</g>' +
+      '<rect x="204" y="150" width="72" height="104" style="fill:' + PH.gold + '" opacity=".18"/>' +
+      '<rect x="204" y="150" width="72" height="104" fill="none" style="stroke:' + PH.line + '" stroke-width="2"/>' +
+      '<line x1="40" y1="330" x2="440" y2="330" style="stroke:' + PH.line + '" stroke-width="2"/>'
+    )
+  ];
+
+  var PH_META = [
+    { title: '从这里看出去', caption: '下午四点，光刚好落在桌角。' },
+    { title: '我的桌面',     caption: '台灯是唯一一件从家里带来的东西。' },
+    { title: '走廊',         caption: '每天要来回四趟，闭着眼都走得回去。' }
+  ];
+
+  /* ------------------------------------------------------------ 渲染骨架 */
+
+  var seat = CONFIG.seat;
+  var senior = CONFIG.senior;
+
+  function seatLine() {
+    return [seat.campus, seat.building, seat.dormitory, seat.room].filter(Boolean).join(' · ');
+  }
+
+  /* 封面 */
+  $('#coverSub').textContent =
+    senior.grade + senior.major + '，' + '在' + (seat.position || '这个座位') + '呆了一年';
+  $('#metaSeat').innerHTML = fill(seatLine());
+  $('#metaPeriod').textContent = seat.period || '';
+  $('#blogLink').href = senior.redirectUrl || '#';
+
+  /* 座位档案 */
+  var seatFields = [
+    ['校区', seat.campus], ['院区', seat.building], ['宿舍楼', seat.dormitory],
+    ['房间', seat.room], ['具体位置', seat.position], ['在座时间', seat.period]
+  ];
+  $('#seatGrid').innerHTML = seatFields.filter(function (f) { return f[1]; }).map(function (f) {
+    return '<div class="seat__cell"><span class="seat__k">' + esc(f[0]) + '</span>' +
+           '<span class="seat__v">' + fill(f[1]) + '</span></div>';
+  }).join('');
+
+  /* -------------------------------------------------------- 封面指针视差
+
+     规范里那条 Layered Parallax：同一份指针位移，按各自的 data-depth 放大后
+     分别喂给每一层，于是前景（网格、装饰条）比正文卡片走得远，纵深就出来了。
+     位移只写进 --px / --py，合成交给 CSS，免得把 .pl-glow 自带的
+     translateX(-50%) 覆盖掉。
+
+     三种情况不注册监听：
+     · 开了"减少动效"；
+     · 触屏 / 没有精确指针的设备 —— 手机根本没有指针可跟，而这一页最主要的
+       打开方式就是手机碰 NFC，给它挂着 pointermove 纯属白烧电；
+     · 封面已经滚出视野。 */
+
+  (function parallax() {
+    var cover = $('#cover');
+    var wrap = $('#parallax');
+    if (!cover || !wrap || !window.PointerEvent) return;
+
+    var layers = $$('[data-depth]', wrap).map(function (el) {
+      return { el: el, depth: parseFloat(el.getAttribute('data-depth')) || 0, x: 0, y: 0 };
+    });
+    if (!layers.length) return;
+
+    var cfg = (CONFIG.motion && CONFIG.motion.parallax) || {};
+    var max = typeof cfg.depth === 'number' ? cfg.depth : 16;
+    var follow = typeof cfg.follow === 'number' ? cfg.follow : 0.12;
+
+    var tx = 0, ty = 0;   // 归一化指针位置，[-1, 1]
+    var live = false;     // 封面在不在视野里
+    var bound = false;    // 监听挂没挂上
+
+    /* 每帧向目标靠拢一点。全部到位就返回 false，ticker 会把这一帧任务摘掉，
+       不留空转的 rAF。 */
+    function step() {
+      var moving = false;
+      for (var i = 0; i < layers.length; i++) {
+        var L = layers[i];
+        var gx = tx * max * L.depth;
+        var gy = ty * max * L.depth;
+        if (Math.abs(gx - L.x) > 0.05 || Math.abs(gy - L.y) > 0.05) {
+          L.x = lerp(L.x, gx, follow);
+          L.y = lerp(L.y, gy, follow);
+          moving = true;
+        } else {
+          L.x = gx; L.y = gy;
+        }
+        L.el.style.setProperty('--px', L.x.toFixed(2) + 'px');
+        L.el.style.setProperty('--py', L.y.toFixed(2) + 'px');
+      }
+      return moving;
+    }
+
+    function onMove(e) {
+      if (!live) return;
+      var r = cover.getBoundingClientRect();
+      // 以封面中心为原点归一化：指针走到封面边缘时位移刚好拉满
+      tx = clamp((e.clientX - (r.left + r.width / 2)) / (r.width / 2 || 1), -1, 1);
+      ty = clamp((e.clientY - (r.top + r.height / 2)) / (r.height / 2 || 1), -1, 1);
+      ticker.add(step);
+    }
+
+    /* 停用时把各层送回原位，同样走靠拢，不硬切 */
+    function park() {
+      tx = 0; ty = 0;
+      ticker.add(step);
+    }
+
+    function on() {
+      if (bound) return;
+      bound = true;
+      window.addEventListener('pointermove', onMove, { passive: true });
+    }
+    function off() {
+      if (!bound) return;
+      bound = false;
+      window.removeEventListener('pointermove', onMove);
+      park();
+    }
+
+    var fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+    function sync() {
+      if (fine.matches && !reduced && live) on(); else off();
+    }
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        live = entries[0].isIntersecting;
+        sync();
+      }, { threshold: 0 }).observe(cover);
+    } else {
+      live = true;
+    }
+
+    // 中途接上鼠标、或改了系统动效偏好，也要跟着切
+    fine.addEventListener('change', sync);
+    mqReduce.addEventListener('change', sync);
+    sync();
+  })();
+
+  /* --------------------------------------------------------------- 寄语
+     打字机。空格和换行按原样落，被打断（点跳过 / 减小动效）时直接补全。 */
+
+  (function letter() {
+    var body = $('#letterBody');
+    var skip = $('#letterSkip');
+    var lines = (CONFIG.message || []).join('\n');
+    var done = false;
+
+    function paint(text, withCaret) {
+      // 顺序不能反：先按行给签名加样式，再换 <br>。反了就没有行首可匹配了。
+      var html = esc(text)
+        .replace(/^(——.*)$/gm, '<span class="sig">$1</span>')
+        .replace(/\n/g, '<br>');
+      body.innerHTML = html + (withCaret ? '<i class="caret"></i>' : '');
+    }
+
+    function finish() {
+      if (done) return;
+      done = true;
+      ticker.remove(step);
+      clearTimeout(guard);
+      paint(lines, false);
+      skip.setAttribute('hidden', '');
+    }
+
+    var guard = 0;
+    var i = 0, acc = 0, last = 0;
+    function step(t) {
+      // 已经补全过就不要再从头写一遍
+      if (done) return false;
+      if (!last) last = t;
+      acc += t - last;
+      last = t;
+      var sp = CONFIG.motion.typewriter.speed;
+      while (acc >= sp && i < lines.length) { acc -= sp; i++; }
+      if (i >= lines.length) { finish(); return false; }
+      paint(lines.slice(0, i), true);
+      return true;
+    }
+
+    paint('', true);
+
+    // 首屏之外不必空转，滚到附近再开始
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (es) {
+        if (es[0].isIntersecting) {
+          io.disconnect();
+          clearTimeout(guard);
+          if (reduced || done) { finish(); return; }
+          ticker.add(step);
+        }
+      }, { threshold: 0.2 });
+      io.observe(body);
+    } else {
+      // 没有观察器就整段直接给出来，别硬做打字机
+      finish();
+    }
+
+    /* 兜底：观察器在视线外不该替人把字写完 —— 那样等滚下来时，
+       上面这个分支会看到 done 已经为真，却仍从头重写一遍，
+       而且按钮那时已经藏了，连跳过都点不了。
+       所以只有这一段确实在视野里、却迟迟没开始时才补全。 */
+    guard = setTimeout(function () {
+      var r = body.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) finish();
+    }, 8000);
+
+    // 打印前必须补全，否则纸上是一封空信
+    window.addEventListener('beforeprint', finish);
+
+    skip.addEventListener('click', finish);
+  })();
+
+  /* ------------------------------------------------------- 记忆碎片横滑条 */
+
+  (function carousel() {
+    var rail = $('#rail');
+    var dots = $('#railDots');
+    if (!rail) return;
+
+    var m = CONFIG.motion.carousel;
+    var cards = [];
+
+    /* 组装卡片 */
+    function push(html, opts) {
+      cards.push({ html: html, opts: opts || {} });
+    }
+
+    push(
+      '<div class="card__body">' +
+        '<h3 class="card__title">桌面印记</h3>' +
+        '<p class="card__text">' + esc(CONFIG.memory.deskMark) + '</p>' +
+      '</div>',
+      { cls: 'card--text-only', title: '桌面印记' }
+    );
+
+    if (CONFIG.memory.musicId) {
+      push(
+        '<div class="card__body">' +
+          '<h3 class="card__title">走之前单曲循环的那首</h3>' +
+          '<p class="card__text">' + esc(CONFIG.memory.musicTitle || '在网易云上') + '</p>' +
+          '<p style="margin-top:14px"><a href="https://music.163.com/#/song?id=' +
+            encodeURIComponent(CONFIG.memory.musicId) + '" target="_blank" rel="noopener">去听一下</a></p>' +
+        '</div>',
+        { cls: 'card--text-only', title: '音乐' }
+      );
+    } else {
+      push(
+        '<div class="card__body">' +
+          '<h3 class="card__title">歌单留白</h3>' +
+          '<p class="card__text">我没留歌，你自己往这儿填吧。' +
+          '<br>在 CONFIG.memory.musicId 里写个网易云 ID 就会出现。</p>' +
+        '</div>',
+        { cls: 'card--text-only', title: '音乐' }
+      );
+    }
+
+    /* 照片卡：有真图用真图，没有用内置示例 */
+    var photos = Array.isArray(CONFIG.memory.photos) ? CONFIG.memory.photos.slice() : [];
+    var usePlaceholder = photos.length === 0;
+    if (usePlaceholder) {
+      photos = PH_META.map(function (meta, i) {
+        return { src: '', title: meta.title, caption: meta.caption, ph: i, isSample: true };
+      });
+    }
+    photos.forEach(function (p, idx) {
+      var i = usePlaceholder ? p.ph : (p.ph != null ? p.ph : idx);
+      var media = p.src
+        ? '<img src="' + esc(p.src) + '" alt="" loading="lazy" draggable="false">'
+        : PLACEHOLDERS[i % PLACEHOLDERS.length];
+      push(
+        '<button class="card__media" type="button" data-photo ' +
+          'data-title="' + esc(p.title || '') + '" ' +
+          'data-caption="' + esc(p.caption || '') + '" ' +
+          'aria-label="放大查看：' + esc(p.title || '照片') + '">' +
+          media +
+          (p.isSample ? '<span class="card__tag">示例图</span>' : '') +
+        '</button>' +
+        '<div class="card__body">' +
+          '<h3 class="card__title">' + esc(p.title || '照片') + '</h3>' +
+          (p.caption ? '<p class="card__text">' + esc(p.caption) + '</p>' : '') +
+        '</div>',
+        { title: p.title || '照片' }
+      );
+    });
+
+    (CONFIG.memory.extras || []).forEach(function (x) {
+      push(
+        '<div class="card__body">' +
+          '<h3 class="card__title">' + esc(x.title || '') + '</h3>' +
+          '<p class="card__text">' + esc(x.text || '') + '</p>' +
+        '</div>',
+        { cls: 'card--text-only', title: x.title || '' }
+      );
+    });
+
+    var tips = [];
+    (CONFIG.guide || []).forEach(function (g) { tips = tips.concat(g.items || []); });
+    if (tips.length) {
+      push(
+        '<div class="card__body">' +
+          '<h3 class="card__title">生存指南</h3>' +
+          '<p class="card__text">' + tips.length + ' 条，我都分类放在下面了。</p>' +
+          '<ul class="card__list">' + tips.slice(0, 3).map(function (t) {
+            return '<li>' + esc(t) + '</li>';
+          }).join('') + '</ul>' +
+          '<p style="margin-top:16px"><button class="btn btn--ghost" type="button" data-goto="tips">去看全部</button></p>' +
+        '</div>',
+        { cls: 'card--text-only', title: '生存指南' }
+      );
+    }
+
+    rail.innerHTML = cards.map(function (c, i) {
+      var cls = (c.opts && c.opts.cls) ? ' ' + c.opts.cls : '';
+      return '<li class="card' + cls + '" data-i="' + i + '">' + c.html + '</li>';
+    }).join('');
+    dots.innerHTML = cards.map(function () { return '<i></i>'; }).join('');
+
+    var els = $$('.card', rail);
+    var dotEls = $$('i', dots);
+    var cache = [];      // 每张卡在轨道坐标系里的中心与半宽，只在测量时更新
+    var cur = els.map(function () { return { s: 1, o: 1 }; });
+    var hovering = false;
+    var want = els.map(function () { return { s: 1, o: 1 }; });
+
+    /* 测量：offsetLeft / offsetWidth 是布局读，必须缓存。
+       每帧只读一次 scrollLeft，其余全是缓存值，避免整列表反复读写布局。 */
+    function measure() {
+      var cw = rail.clientWidth;
+      cache = els.map(function (el) {
+        return {
+          center: el.offsetLeft + el.offsetWidth / 2,
+          half: el.offsetWidth / 2,
+          target: null
+        };
+      });
+      cache.forEach(function (c, i) { c.el = els[i]; });
+      cache._cw = cw;
+      cache._halfSpan = Math.max(1, cw / 2 + (els[0] ? els[0].offsetWidth / 2 : 150));
+    }
+
+    function frame() {
+      var mid = rail.scrollLeft + cache._cw / 2;
+      var moving = false;
+      for (var i = 0; i < els.length; i++) {
+        var c = cache[i];
+        var d = Math.abs(c.center - mid);
+        // 归一化距离 → 0（最远）到 1（正中）
+        var t = clamp(1 - (d - 0) / cache._halfSpan, 0, 1);
+        var ts = m.minScale + (1 - m.minScale) * t;
+        var to = m.minOpacity + (1 - m.minOpacity) * t;
+
+        var cc = cur[i];
+        cc.s = lerp(cc.s, ts, m.follow);
+        cc.o = lerp(cc.o, to, m.follow);
+        if (Math.abs(cc.s - ts) > 0.0015 || Math.abs(cc.o - to) > 0.0015) moving = true;
+
+        // 开了"减少动效"就直接摆成原尺寸，别依赖 CSS 的 !important 去盖内联样式
+        els[i].style.transform = 'scale(' + (reduced ? 1 : cc.s).toFixed(4) + ')';
+        els[i].style.opacity = (reduced ? 1 : cc.o).toFixed(3);
+      }
+
+      /* 圆点跟随最近的那张 */
+      var nearest = 0, best = Infinity;
+      for (var k = 0; k < cache.length; k++) {
+        var dd = Math.abs(cache[k].center - mid);
+        if (dd < best) { best = dd; nearest = k; }
+      }
+      for (var j = 0; j < dotEls.length; j++) dotEls[j].classList.toggle('on', j === nearest);
+
+      // 追得上就停；有 scroll 事件会重新 add 回来
+      return moving || hovering;
+    }
+
+    var running = false;
+    function kick() {
+      if (reduced) return;
+      if (running) return;
+      running = true;
+      ticker.add(function () {
+        var keep = frame();
+        if (!keep) { running = false; }
+        return keep;
+      });
+    }
+
+    measure();
+    rail.addEventListener('scroll', kick, { passive: true });
+    rail.addEventListener('pointerenter', function () { hovering = true; kick(); });
+    rail.addEventListener('pointerleave', function () { hovering = false; });
+    resizeJobs.push(function () { measure(); frame(); });
+
+    /* 首帧先摆正，避免一开始所有卡片都是满尺寸 */
+    cur.forEach(function (_, i) {
+      var mid = rail.scrollLeft + rail.clientWidth / 2;
+      var d = Math.abs(cache[i].center - mid);
+      var t = clamp(1 - d / cache._halfSpan, 0, 1);
+      cur[i].s = m.minScale + (1 - m.minScale) * t;
+      cur[i].o = m.minOpacity + (1 - m.minOpacity) * t;
+    });
+    frame();
+
+    /* 翻页按钮 + 键盘。参考规范里"键盘或点击改变状态后视觉同步" */
+    function go(dir) {
+      var mid = rail.scrollLeft + rail.clientWidth / 2;
+      var target = null;
+      for (var i = 0; i < cache.length; i++) {
+        var c = cache[i].center;
+        if (dir > 0 && c > mid + 8) { target = i; break; }
+        if (dir < 0 && c < mid - 8) { target = i; }
+      }
+      if (target == null) target = dir > 0 ? cache.length - 1 : 0;
+      var el = els[target];
+      rail.scrollTo({
+        left: el.offsetLeft + el.offsetWidth / 2 - rail.clientWidth / 2,
+        behavior: reduced ? 'auto' : 'smooth'
+      });
+    }
+    $('#railPrev').addEventListener('click', function () { go(-1); });
+    $('#railNext').addEventListener('click', function () { go(1); });
+    rail.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+    });
+
+    // 系统动效偏好中途被改：按新状态重画一次，把卡片上已有的内联样式校正回来
+    mqReduce.addEventListener('change', function () { frame(); });
+  })();
+
+  /* -------------------------------------------------- 液态 Tab（两处复用）
+
+     实现要点，对照规范第 5 条：
+     · 指示背景是独立元素，标签自己的命中区和文字位置全程不动。
+     · 前后边分开跑：前边用基准时长，后边按 tailRatio 拖长 → 视觉上"先拉长再收拢"。
+     · 连续点击时从 cur 接续，而 cur 就是当前真正渲染出来的位置，不是上一个目标。
+     · 容器或标签尺寸变化后重新测量并对齐，不留下过期坐标。 */
+
+  function makeTabs(opt) {
+    var list = opt.list;
+    var ind = opt.indicator;
+    var tabs = $$('[role="tab"]', list);
+    var state = { l: 0, w: 0, a: 0 };
+    var cur = { l: 0, w: 0, a: 1 };
+    var run = null;
+    var index = -1;
+
+    function measure(i) {
+      var tr = list.getBoundingClientRect();
+      var r = tabs[i].getBoundingClientRect();
+      // 横向可滚动容器要补上 scrollLeft，否则滚动后会算出负坐标
+      var sl = list.scrollLeft || 0;
+      return { l: r.left - tr.left + sl, w: r.width };
+    }
+
+    function apply() {
+      ind.style.transform = 'translateX(' + cur.l.toFixed(2) + 'px)';
+      ind.style.width = Math.max(0, cur.w).toFixed(2) + 'px';
+      ind.style.opacity = cur.a.toFixed(3);
+    }
+
+    function settle() {
+      cur.l = state.l; cur.w = state.w; cur.a = 1;
+      apply();
+      run = null;
+      if (ind.classList) ind.classList.remove('is-anim');
+    }
+
+    function animate(from, to, dir) {
+      var mm = CONFIG.motion.tab;
+      var dur = reduced ? 0 : mm.duration;
+      if (dur === 0) { settle(); return; }
+
+      var maxW = Math.max(to.w, from.w) * mm.maxStretch;
+      var t0 = performance.now();
+      var leadDur = dur;
+      var trailDur = dur * mm.tailRatio;
+
+      function tick(now) {
+        var pLead = clamp((now - t0) / leadDur, 0, 1);
+        var pTrail = clamp((now - t0) / trailDur, 0, 1);
+        var eLead = easeOutCubic(pLead);
+        var eTrail = easeOutCubic(pTrail);
+
+        var l, r;
+        if (dir > 0) {
+          // 往右走：右边先到，左边后到 → 中间那段宽度被撑大
+          r = lerp(from.l + from.w, to.l + to.w, eLead);
+          l = lerp(from.l, to.l, eTrail);
+        } else if (dir < 0) {
+          l = lerp(from.l, to.l, eLead);
+          r = lerp(from.l + from.w, to.l + to.w, eTrail);
+        } else {
+          l = lerp(from.l, to.l, easeOutCubic(pLead));
+          r = l + lerp(from.w, to.w, easeOutCubic(pLead));
+        }
+        if (r - l > maxW) r = l + maxW;
+
+        cur.l = l; cur.w = Math.max(0, r - l);
+        cur.a = lerp(cur.a, 1, 0.35);
+        ind.style.transform = 'translateX(' + cur.l.toFixed(2) + 'px)';
+        ind.style.width = cur.w.toFixed(2) + 'px';
+        ind.style.opacity = cur.a.toFixed(3);
+
+        if (pTrail >= 1) { settle(); return false; }
+        return true;
+      }
+
+      if (run) ticker.remove(run);
+      run = tick;
+      ticker.add(run);
+    }
+
+    function go(i, focusTab) {
+      i = clamp(i, 0, tabs.length - 1);
+      if (i === index) { if (focusTab) tabs[i].focus(); return; }
+      var dir = index === -1 ? 0 : (i > index ? 1 : -1);
+      index = i;
+
+      state = measure(i);
+
+      tabs.forEach(function (t, k) {
+        t.setAttribute('aria-selected', k === i ? 'true' : 'false');
+        t.tabIndex = k === i ? 0 : -1;
+      });
+
+      animate({ l: cur.l, w: cur.w }, state, dir);
+      if (focusTab && document.activeElement !== tabs[i]) tabs[i].focus();
+      if (opt.onChange) opt.onChange(i);
+    }
+
+    /* 首次定位：先量一次并把 cur 直接摆到正确位置，不要从 0 滑进来。
+       同时把 index 认下来 —— 否则第一次点别的标签时 dir 会算成 0，
+       指示器只做等宽平移，丢了"先拉长再收拢"那一下（指南那组就吃过这个亏）。 */
+    function reset() {
+      if (index < 0) index = 0;
+      var s = measure(clamp(index, 0, tabs.length - 1));
+      state = s; cur = { l: s.l, w: s.w, a: 1 };
+      apply();
+    }
+
+    tabs.forEach(function (t, k) {
+      t.addEventListener('click', function () {
+        if (opt.scrollMode) {
+          // 滚动模式：点击只是滚过去，选中状态交给滚动监听回调 go()
+          if (opt.onPick) opt.onPick(k);
+        } else {
+          go(k);
+        }
+      });
+      t.addEventListener('keydown', function (e) {
+        var n = null;
+        if (e.key === 'ArrowRight') n = k + 1;
+        else if (e.key === 'ArrowLeft') n = k - 1;
+        else if (e.key === 'Home') n = 0;
+        else if (e.key === 'End') n = tabs.length - 1;
+        if (n !== null) {
+          e.preventDefault();
+          if (opt.scrollMode && opt.onPick) opt.onPick(clamp(n, 0, tabs.length - 1));
+          else go(clamp(n, 0, tabs.length - 1), true);
+        }
+      });
+    });
+
+    resizeJobs.push(reset);
+
+    return {
+      go: go,
+      reset: reset,
+      get index() { return index; },
+      // 布局稳定后再量一次，字体加载完宽度会变
+      lateMeasure: function () {
+        var prev = state;
+        reset();
+        if (Math.abs(prev.w - state.w) > 0.5 || Math.abs(prev.l - state.l) > 0.5) settle();
+      }
+    };
+  }
+
+  /* ---------------------------------------------------- 顶部导航（滚动式） */
+
+  (function nav() {
+    var list = $('#navTabs');
+    var tabs = $$('[role="tab"]', list);
+    var targets = tabs.map(function (t) { return document.getElementById(t.dataset.target); });
+    var offsets = [];
+    var lock = 0;
+
+    function measure() {
+      offsets = targets.map(function (el) {
+        return el ? el.getBoundingClientRect().top + window.scrollY : 0;
+      });
+    }
+
+    var inst = makeTabs({
+      list: list,
+      indicator: $('#navInd'),
+      scrollMode: true,
+      onPick: function (i) {
+        lock = Date.now() + 700;
+        var el = targets[i];
+        if (!el) return;
+        window.scrollTo({
+          top: el.getBoundingClientRect().top + window.scrollY - (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 58) + 1,
+          behavior: reduced ? 'auto' : 'smooth'
+        });
+        // 点完立刻同步一次视觉，别等滚动
+        inst.go(i);
+      }
+    });
+
+    function spy() {
+      var line = window.scrollY + 120;
+      var idx = 0;
+      for (var i = 0; i < offsets.length; i++) {
+        if (offsets[i] <= line) idx = i;
+      }
+      // 到底了就直接选最后一项
+      if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) idx = offsets.length - 1;
+      if (Date.now() < lock) return;
+      if (idx !== inst.index) inst.go(idx);
+      // 把当前标签滚进可视范围，标签多了也不会跑到屏幕外
+      var t = tabs[idx];
+      if (t && list.scrollWidth > list.clientWidth) {
+        var tr = list.getBoundingClientRect();
+        var r = t.getBoundingClientRect();
+        if (r.left < tr.left) list.scrollLeft -= (tr.left - r.left + 12);
+        else if (r.right > tr.right) list.scrollLeft += (r.right - tr.right + 12);
+      }
+    }
+
+    var spyRaf = 0;
+    function onScroll() {
+      // 进度条
+      var max = document.body.scrollHeight - window.innerHeight;
+      var p = max > 0 ? clamp(window.scrollY / max, 0, 1) : 0;
+      $('#progressBar').style.transform = 'scaleX(' + p.toFixed(4) + ')';
+
+      if (spyRaf) return;
+      spyRaf = requestAnimationFrame(function () { spyRaf = 0; spy(); });
+    }
+
+    measure();
+    inst.reset();
+    spy();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    resizeJobs.push(function () { measure(); inst.reset(); spy(); });
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () { inst.lateMeasure(); });
+    }
+    // 图片加载完高度会变，滚动锚点得跟着更新
+    window.addEventListener('load', function () { measure(); spy(); });
+  })();
+
+  /* ------------------------------------------- 生存指南（切换式液态 Tab） */
+
+  (function guide() {
+    var tabsBox = $('#guideTabs');
+    var panelsBox = $('#guidePanels');
+    var groups = CONFIG.guide || [];
+    if (!groups.length) return;
+
+    tabsBox.insertAdjacentHTML('beforeend', groups.map(function (g, i) {
+      return '<button class="guide__tab" role="tab" id="gtab-' + i + '" aria-controls="gpanel-' + i + '" ' +
+             'aria-selected="' + (i === 0 ? 'true' : 'false') + '" tabindex="' + (i === 0 ? '0' : '-1') + '">' +
+             esc(g.label) + '</button>';
+    }).join(''));
+
+    panelsBox.innerHTML = groups.map(function (g, i) {
+      return '<div class="guide__panel" role="tabpanel" id="gpanel-' + i + '" aria-labelledby="gtab-' + i + '"' +
+             (i === 0 ? '' : ' hidden') + '>' +
+        '<ul class="tips">' + (g.items || []).map(function (t, k) {
+          return '<li class="tip"><span class="tip__n">' + String(k + 1).padStart(2, '0') + '</span>' +
+                 '<span class="tip__t">' + esc(t) + '</span></li>';
+        }).join('') + '</ul>' +
+      '</div>';
+    }).join('');
+
+    var panels = $$('.guide__panel', panelsBox);
+
+    makeTabs({
+      list: tabsBox,
+      indicator: $('#guideInd'),
+      onChange: function (i) {
+        panels.forEach(function (p, k) { p.hidden = k !== i; });
+      }
+    }).reset();
+  })();
+
+  /* --------------------------------------------- 全屏图片（共享元素展开）
+
+     展开：把缩略图克隆到遮罩里，用 transform 把它从"源矩形"推到"目标矩形"。
+     因为最终尺寸是按源图宽高比推出来的，缩放是等比的，所以图片不会被拉变形。
+     关闭：下拉距离或松手速度够大就放它飞回源图，否则弹回原位。
+     源图已经滚出屏幕或不存在时，退化成淡出，不飞向过期坐标。 */
+
+  var viewer = (function () {
+    var root = $('#viewer');
+    var stage = $('#viewerStage');
+    var titleEl = $('#viewerTitle');
+    var capEl = $('#viewerCap');
+    var hintEl = $('#viewerHint');
+    var m = CONFIG.motion.viewer;
+
+    var clone = null;
+    var source = null;
+    var open = false;
+    var drag = null;
+    var lastFocus = null;
+
+    function fitRect(sw, sh) {
+      var padX = 24;
+      var barH = 118;
+      var maxW = Math.max(120, window.innerWidth - padX * 2);
+      var maxH = Math.max(120, window.innerHeight - barH - 24);
+      var ar = sw / sh;
+      var w = maxW, h = w / ar;
+      if (h > maxH) { h = maxH; w = h * ar; }
+      return { w: Math.round(w), h: Math.round(h) };
+    }
+
+    function setFlight(from, to, dur) {
+      clone.style.transition = 'none';
+      clone.style.width = to.w + 'px';
+      clone.style.height = to.h + 'px';
+      clone.style.transform = 'translate(' + (from.cx - to.cx) + 'px,' + (from.cy - to.cy) + 'px) scale(' + (from.w / to.w) + ')';
+      void clone.offsetWidth; // 强制回流，让上面这帧先落地
+      clone.classList.add('is-flying');
+      clone.style.transition = 'transform ' + dur + 'ms cubic-bezier(.22,.61,.36,1)';
+      clone.style.transform = 'translate(0,0) scale(1)';
+      var done = function () {
+        clone.classList.remove('is-flying');
+        clone.style.transition = '';
+        clone.removeEventListener('transitionend', done);
+      };
+      clone.addEventListener('transitionend', done);
+    }
+
+    function build(src) {
+      var node = src.cloneNode(true);
+      // 直接换掉类名，别 add：卡片那套 border / hover 遮罩不该跟到全屏来
+      node.className = 'viewer__media';
+      node.removeAttribute('data-photo');
+      node.removeAttribute('aria-label');
+      node.setAttribute('aria-hidden', 'true');
+      node.tabIndex = -1;
+      var img = node.querySelector && node.querySelector('img');
+      if (img) {
+        img.addEventListener('error', function () {
+          node.innerHTML = '<p class="viewer__err">这张图没能加载出来。检查一下 CONFIG.memory.photos 里的地址对不对。</p>';
+        });
+      }
+      return node;
+    }
+
+    function openViewer(src) {
+      if (open) return;
+      var title = src.dataset.title || '';
+      var caption = src.dataset.caption || '';
+      var sr = src.getBoundingClientRect();
+
+      source = src;
+      lastFocus = document.activeElement;
+
+      stage.innerHTML = '';
+      clone = build(src);
+      stage.appendChild(clone);
+
+      var fit = fitRect(sr.width || 4, sr.height || 3);
+      titleEl.textContent = title;
+      capEl.textContent = caption;
+      hintEl.textContent = reduced ? '按 Esc 关掉' : '往下拖，或者按 Esc 关掉';
+
+      root.hidden = false;
+      document.body.classList.add('is-locked');
+
+      var to = { w: fit.w, h: fit.h, cx: window.innerWidth / 2, cy: window.innerHeight / 2 };
+      var from = { w: sr.width, h: sr.height, cx: sr.left + sr.width / 2, cy: sr.top + sr.height / 2 };
+
+      if (reduced) {
+        clone.style.width = to.w + 'px';
+        clone.style.height = to.h + 'px';
+      } else {
+        setFlight(from, to, m.openDuration);
+      }
+      root.querySelector('.viewer__close').focus({ preventScroll: true });
+      open = true;
+    }
+
+    function closeViewer() {
+      if (!open) return;
+      open = false;
+      document.body.classList.remove('is-locked');
+
+      // 源图还在视口里才飞回去，否则只做淡出
+      var ok = source && document.contains(source);
+      var sr = ok ? source.getBoundingClientRect() : null;
+      var visible = sr && sr.bottom > 0 && sr.top < window.innerHeight;
+
+      var cleanup = function () {
+        // 焦点优先还给被点开的那张缩略图。程序化点击时它没拿到焦点，
+        // 这时再退回打开前的元素，避免焦点掉到 body 上。
+        var back = (source && document.contains(source) && source.focus) ? source
+                 : (lastFocus && document.contains(lastFocus) && lastFocus.focus ? lastFocus : null);
+
+        root.hidden = true;
+        stage.innerHTML = '';
+        clone = null;
+        stage.style.transition = '';
+        stage.style.transform = '';
+        stage.style.opacity = '';
+        source = null;
+        if (back) back.focus({ preventScroll: true });
+      };
+
+      if (reduced || !visible) {
+        cleanup();
+        return;
+      }
+
+      /* 从"眼下真实位置"起飞，而不是从理论上的居中位置。
+         手指刚拖到一半就松手时，stage 上还挂着位移，先把 stage 归零、
+         再在同一帧里用 transform 把 clone 拉回原处，浏览器只会画最终这一帧，
+         所以既不会跳，也不会和飞回动画叠加。 */
+      var before = clone.getBoundingClientRect();
+      stage.style.transition = 'none';
+      stage.style.transform = 'none';
+      stage.style.opacity = '1';
+      var now = clone.getBoundingClientRect(); // 归零后重新量，作为位移基准
+
+      var dur = Math.max(240, m.openDuration * 0.8);
+      var ease = 'cubic-bezier(.22,.61,.36,1)';
+
+      clone.style.transition = 'transform 0ms linear';
+      clone.style.transform =
+        'translate(' + (before.left - now.left) + 'px,' + (before.top - now.top) + 'px) ' +
+        'scale(' + (before.width / now.width) + ')';
+      void clone.offsetWidth;
+
+      clone.style.transition = 'transform ' + dur + 'ms ' + ease;
+      clone.style.transform =
+        'translate(' + (sr.left - now.left) + 'px,' + (sr.top - now.top) + 'px) ' +
+        'scale(' + (sr.width / now.width) + ')';
+
+      setTimeout(cleanup, dur + 30);
+    }
+
+    /* 下拉手势：拖动期间进度直接映射到位移和透明度，松手时用距离 + 速度一起判定。
+       监听挂在 window 上而不是用 pointer capture —— 指针移出遮罩也不会丢事件。 */
+    function bindDrag() {
+      stage.addEventListener('pointerdown', function (e) {
+        if (!open || reduced || drag) return;
+        drag = {
+          id: e.pointerId,
+          y0: e.clientY,
+          dy: 0,
+          v: 0,
+          lastT: performance.now(),
+          lastY: e.clientY
+        };
+        stage.style.transition = 'none';
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onEnd);
+        window.addEventListener('pointercancel', onEnd);
+      });
+
+      function onMove(e) {
+        if (!drag || e.pointerId !== drag.id) return;
+        var now = performance.now();
+        var dt = Math.max(1, now - drag.lastT);
+        drag.v = (e.clientY - drag.lastY) / dt;
+        drag.lastY = e.clientY;
+        drag.lastT = now;
+        drag.dy = Math.max(0, e.clientY - drag.y0);
+
+        var p = clamp(drag.dy / (window.innerHeight * m.closeRatio), 0, 1);
+        stage.style.transform = 'translateY(' + drag.dy.toFixed(1) + 'px) scale(' + (1 - p * 0.08).toFixed(4) + ')';
+        stage.style.opacity = (1 - p * 0.45).toFixed(3);
+      }
+
+      function onEnd(e) {
+        if (!drag || (e.pointerId != null && e.pointerId !== drag.id)) return;
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onEnd);
+        window.removeEventListener('pointercancel', onEnd);
+
+        var d = drag;
+        drag = null;
+
+        var ratio = d.dy / (window.innerHeight * m.closeRatio);
+        var fast = d.v > m.closeVelocity;
+        if (ratio > 1 || (fast && d.dy > 24)) {
+          closeViewer();
+          return;
+        }
+        // 弹回原位：从当前进度和当前速度收尾，不是瞬间跳回去
+        stage.style.transition = 'transform .34s cubic-bezier(.22,.61,.36,1), opacity .24s linear';
+        stage.style.transform = 'none';
+        stage.style.opacity = '1';
+      }
+    }
+
+    /* 事件绑定 */
+    document.addEventListener('click', function (e) {
+      var media = e.target.closest && e.target.closest('[data-photo]');
+      if (media) { e.preventDefault(); openViewer(media); return; }
+      if (e.target.closest && e.target.closest('[data-close]')) closeViewer();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && open) closeViewer();
+    });
+
+    bindDrag();
+
+    return { open: function () { return open; } };
+  })();
+
+  /* ------------------------------------------------------------ 传承证书 */
+
+  (function cert() {
+    var c = CONFIG.certificate;
+    $('#certTitleText').textContent = c.title;
+    $('#certSubText').textContent = c.subtitle;
+    $('#certNo').textContent = 'NO. ' + c.number;
+    $('#certSign').textContent = senior.name;
+    $('#certHolder').textContent = '下一位住客';
+    $('#certSeat').innerHTML = fill(seatLine() + '　' + (seat.position || ''));
+    $('#certPeriod').textContent = seat.period || '';
+    $('#certDate').textContent = fmtDate(new Date());
+
+    var note = $('#certNote');
+    var isTouch = matchMedia('(hover: none)').matches;
+
+    function draw() {
+      var W = 1400, H = 990, DPR = 2;
+      var cv = document.createElement('canvas');
+      cv.width = W * DPR; cv.height = H * DPR;
+      var g = cv.getContext('2d');
+      g.scale(DPR, DPR);
+
+      /* 证书跟着当前主题走：深色是黑金卡片，浅色是米白纸 + 暗金。
+         每次点保存都重新取一遍变量，所以切完主题再下载，拿到的是对应那套。 */
+      var C = {
+        bg:    cssVar('--bg'),
+        fg:    cssVar('--fg'),
+        fg2:   cssVar('--fg-2'),
+        fg3:   cssVar('--fg-3'),
+        amber: cssVar('--amber'),
+        dim:   cssVar('--amber-dim'),
+        line:  cssVar('--line-2'),
+        tint:  cssVar('--tint-3'),
+        tint0: cssVar('--tint-0')
+      };
+
+      g.fillStyle = C.bg; g.fillRect(0, 0, W, H);
+
+      var glow = g.createRadialGradient(W / 2, H * 0.16, 0, W / 2, H * 0.16, H * 0.95);
+      glow.addColorStop(0, C.tint);
+      glow.addColorStop(1, C.tint0);
+      g.fillStyle = glow; g.fillRect(0, 0, W, H);
+
+      g.strokeStyle = C.dim; g.lineWidth = 2; g.strokeRect(46, 46, W - 92, H - 92);
+      g.strokeStyle = C.amber; g.lineWidth = 1; g.strokeRect(62, 62, W - 124, H - 124);
+
+      // 四角小标记，替掉花哨的装饰
+      g.strokeStyle = C.amber; g.lineWidth = 2;
+      [[80, 80, 1, 1], [W - 80, 80, -1, 1], [80, H - 80, 1, -1], [W - 80, H - 80, -1, -1]].forEach(function (p) {
+        g.beginPath();
+        g.moveTo(p[0] + 22 * p[2], p[1]);
+        g.lineTo(p[0], p[1]);
+        g.lineTo(p[0], p[1] + 22 * p[3]);
+        g.stroke();
+      });
+
+      var F = '"Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif';
+      g.textAlign = 'center';
+
+      g.fillStyle = C.fg3;
+      g.font = '500 20px ' + F;
+      g.fillText('CAUC  ·  时 空 胶 囊', W / 2, 156);
+
+      g.fillStyle = C.fg;
+      g.font = '700 72px ' + F;
+      g.fillText(c.title, W / 2, 268);
+
+      g.fillStyle = C.dim;
+      g.font = '500 22px ' + F;
+      g.fillText(c.subtitle.toUpperCase(), W / 2, 314);
+
+      g.strokeStyle = C.line; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(W / 2 - 260, 356); g.lineTo(W / 2 + 260, 356); g.stroke();
+
+      g.font = '500 28px ' + F;
+      g.fillStyle = C.fg3;
+      g.fillText('兹 证 明  下 一 位 住 客', W / 2, 428);
+
+      g.fillStyle = C.fg;
+      g.font = '600 46px ' + F;
+      g.fillText(seatLine(), W / 2, 502);
+
+      g.fillStyle = C.fg2;
+      g.font = '400 30px ' + F;
+      g.fillText((seat.position || '') + '   ·   ' + (seat.period || ''), W / 2, 556);
+
+      g.fillStyle = C.fg3;
+      g.font = '400 26px ' + F;
+      g.fillText('正 式 承 接 此 座 位 及 其 上 的 一 整 年 时 光', W / 2, 622);
+
+      g.strokeStyle = C.line; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(160, 700); g.lineTo(W - 160, 700); g.stroke();
+
+      g.textAlign = 'left';
+      g.fillStyle = C.fg3; g.font = '400 24px ' + F;
+      g.fillText('NO. ' + c.number, 160, 762);
+      g.fillText('签 发 于 ' + fmtDate(new Date()), 160, 806);
+
+      g.textAlign = 'right';
+      g.fillStyle = C.amber; g.font = '500 40px ' + F;
+      g.fillText(senior.name, W - 160, 772);
+      g.fillStyle = C.fg3; g.font = '400 20px ' + F;
+      g.fillText(senior.signature || '', W - 160, 812);
+
+      return cv;
+    }
+
+    $('#certSave').addEventListener('click', function () {
+      try {
+        var cv = draw();
+        var url = cv.toDataURL('image/png');
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = '座位传承证书-' + c.number + '.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        note.textContent = '已经存到你的下载目录了。';
+      } catch (err) {
+        note.textContent = '这张图没能生成。可以长按上面的证书直接截图。';
+      }
+    });
+
+    $('#certCopy').addEventListener('click', function () {
+      var text = c.number;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          note.textContent = '编号已复制：' + text;
+        }, function () {
+          note.textContent = '复制没成功，手动抄一下吧：' + text;
+        });
+      } else {
+        note.textContent = '这个浏览器不给复制，手动抄一下吧：' + text;
+      }
+    });
+
+    if (isTouch) note.textContent = '手机上如果没弹出下载，长按上面那张证书截图就行。';
+  })();
+
+  /* ------------------------------------------------------------ 留言入口
+
+     这一块只做一件事：把学弟送去博客评论区。
+     地址、按钮文案、说明都在 CONFIG.guestbook 里改。
+     页面自己不存留言 —— 存本地的留言别人看不到，等于白留。 */
+
+  (function guestbook() {
+    var g = CONFIG.guestbook || {};
+    var btn = $('#wallGoto');
+    var label = $('#wallGotoLabel');
+    var desc = $('#wallDesc');
+    var note = $('#wallNote');
+    var hint = $('#wallHint');
+
+    if (desc && g.desc) desc.textContent = g.desc;
+    if (note && g.note) note.textContent = g.note;
+    if (hint && g.hint) hint.textContent = g.hint;
+    if (label && g.label) label.textContent = g.label;
+    if (btn && g.url) btn.href = g.url;
+  })();
+
+  /* -------------------------------------------------------- 秘密基地弹层 */
+
+  (function secret() {
+    var sheet = $('#sheet');
+    var listEl = $('#sheetList');
+    var brand = $('#brand');
+    var taps = [];
+    var lastFocus = null;
+
+    listEl.innerHTML = (CONFIG.secretBase || []).map(function (item) {
+      if (item.type === 'link') {
+        return '<li><a class="link" href="' + esc(item.url) + '" target="_blank" rel="noopener">' +
+          '<span>' + esc(item.title) + '</span>' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">' +
+          '<path d="M8 6h10v10"/><path d="M18 6 7 17"/></svg></a></li>';
+      }
+      return '<li>' + esc(item.content) + '</li>';
+    }).join('');
+
+    function open() {
+      lastFocus = document.activeElement;
+      sheet.hidden = false;
+      document.body.classList.add('is-locked');
+      var closeBtn = sheet.querySelector('.sheet__head .iconbtn');
+      if (closeBtn) closeBtn.focus({ preventScroll: true });
+    }
+    function close() {
+      sheet.hidden = true;
+      document.body.classList.remove('is-locked');
+      if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+    }
+
+    // 连点五次标题。用点击计数而不是摇一摇 —— 不用申请传感器权限，
+    // 也不会在用户只想滚动页面时误触发。
+    brand.addEventListener('click', function () {
+      var now = Date.now();
+      taps = taps.filter(function (t) { return now - t < 2600; });
+      taps.push(now);
+      if (taps.length >= 5) {
+        taps = [];
+        var soup = CONFIG.chickenSoup || [];
+        if (soup.length) {
+          var pick = soup[Math.floor(Math.random() * soup.length)];
+          listEl.insertAdjacentHTML('beforeend',
+            '<li style="color:#D9A441">今日份：' + esc(pick) + '</li>');
+        }
+        open();
+      }
+    });
+
+    sheet.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('[data-close-sheet]')) close();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !sheet.hidden) close();
+    });
+  })();
+
+  /* ---------------------------------------------------------- 时段问候条 */
+
+  (function greeting() {
+    var g = CONFIG.greetings || {};
+    var h = new Date().getHours();
+    var text = g[h] || g[String(h)];
+    if (!text) return;
+    // 一次会话只提醒一次，别烦人
+    try {
+      if (sessionStorage.getItem('jiyu.greeted')) return;
+      sessionStorage.setItem('jiyu.greeted', '1');
+    } catch (e) { /* 隐私模式忽略 */ }
+
+    var el = document.createElement('div');
+    el.className = 'toast';
+    el.setAttribute('role', 'status');
+    el.innerHTML = '<span>' + esc(text) + '</span>' +
+      '<button type="button" aria-label="关掉提示">' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
+      '<path d="M6 6l12 12M18 6L6 18"/></svg></button>';
+    document.body.appendChild(el);
+    el.querySelector('button').addEventListener('click', function () {
+      el.remove();
+    });
+    if (!reduced) {
+      setTimeout(function () { el.style.transition = 'opacity .5s linear'; el.style.opacity = '0'; }, 9000);
+      setTimeout(function () { el.remove(); }, 9700);
+    }
+  })();
+
+  /* ---------------------------------------------------------- 跳到某一段 */
+
+  (function goto() {
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest && e.target.closest('[data-goto]');
+      if (!btn) return;
+      var el = document.getElementById(btn.dataset.goto);
+      if (!el) return;
+      var navH = $('.nav').offsetHeight || 58;
+      window.scrollTo({
+        top: el.getBoundingClientRect().top + window.scrollY - navH + 1,
+        behavior: reduced ? 'auto' : 'smooth'
+      });
+      // 焦点也要跟过去，否则键盘用户还留在原地
+      el.setAttribute('tabindex', '-1');
+      setTimeout(function () { el.focus({ preventScroll: true }); }, reduced ? 0 : 520);
+    });
+  })();
+
+  /* -------------------------------------------------------- 滚动入场提示
+
+     只负责"首次进入视野时淡入"，不参与任何布局。减小动效时 CSS 直接
+     让它可见，JS 这边也不再观察。 */
+
+  (function reveal() {
+    var items = $$('.reveal');
+    if (reduced || !('IntersectionObserver' in window)) {
+      items.forEach(function (el) { el.classList.add('is-in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          en.target.classList.add('is-in');
+          io.unobserve(en.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
+    items.forEach(function (el) { io.observe(el); });
+
+    // 兜底：观察器万一没触发，界面上不该有东西是永远看不见的
+    setTimeout(function () {
+      items.forEach(function (el) {
+        var r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight && r.bottom > 0) el.classList.add('is-in');
+      });
+    }, 2500);
+  })();
+
+  /* ------------------------------------------------------------ 页脚信息 */
+
+  $('#footSig').textContent = senior.name + ' · ' + senior.signature;
+  $('#footBlog').href = senior.redirectUrl || '#';
+
+  /* 页面全部就绪后重新量一次导航，把字体和图片造成的高度变化吃进去 */
+  window.addEventListener('load', function () {
+    window.dispatchEvent(new Event('resize'));
+  });
+})();
+</script>
+</body>
+</html>
