@@ -997,6 +997,22 @@ body.is-locked{ overflow:hidden; }
   .nav,.progress,.toast{ display:none; }
 }
 </style>
+
+<!-- ===================== 点赞组件 =====================
+     样式和脚本来自博客那边的点赞系统（部署在 qvp.cc.cd）。
+     本页在另一个域名下，属于跨域调用，所以资源地址写绝对路径，
+     并且这个域名必须在那边 config 的 CORS 白名单里。 -->
+<link rel="stylesheet" href="https://qvp.cc.cd/blog-likes/assets/likes/likes.css">
+<style>
+  /* 组件自带珊瑚橙 #F77234，跟本页的琥珀金不搭，这里改成跟随主题的 --amber。
+     用 html 前缀多一级特异性，将来调整引入顺序也不会失效。
+     --amber 在深色/浅色两套里都有定义，所以切换主题时它自动跟着走。 */
+  html .like-widget{
+    --like-accent: var(--amber);
+    --like-radius: var(--r-md);
+    --like-font-size: 15px;
+  }
+</style>
 </head>
 
 <body data-page-node-id="kETFGozG1XEs4w8tsrRJWm">
@@ -1218,6 +1234,9 @@ body.is-locked{ overflow:hidden; }
         <span class="wall-cta__hint" id="wallHint">会打开新标签页</span>
       </div>
     </div>
+
+    <!-- 点赞：读完想表个态就点一下。数据存在博客那边的 MySQL 里，本页自己不存 -->
+    <div class="like-widget" data-article-id="xuezhang-jiyu"></div>
   </section>
 </main>
 
@@ -2856,5 +2875,9 @@ const CONFIG = {
   });
 })();
 </script>
+
+<!-- 点赞组件脚本 · 放在页面脚本之后，确保 DOM 已经全部就绪 -->
+<script src="https://qvp.cc.cd/blog-likes/assets/likes/likes.js?v=1.8.0"
+        data-api="https://qvp.cc.cd/blog-likes/api/likes.php"></script>
 </body>
 </html>
